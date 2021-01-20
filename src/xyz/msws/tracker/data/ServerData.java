@@ -145,6 +145,11 @@ public class ServerData {
 	}
 
 	@Override
+	public String toString() {
+		return getIp() + ":" + getPort();
+	}
+
+	@Override
 	public boolean equals(Object obj) {
 		if (obj == this)
 			return true;

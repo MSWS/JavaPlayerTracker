@@ -1,5 +1,6 @@
 package xyz.msws.tracker.module;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +31,7 @@ public class PlayerTrackerModule extends Module {
 
 	@Override
 	public void unload() {
-		players.values().forEach(ServerPlayer::saveData);
+		save();
 		players = new HashMap<String, ServerPlayer>();
 	}
 
@@ -49,6 +50,10 @@ public class PlayerTrackerModule extends Module {
 		result.load();
 		players.put(name, result);
 		return result;
+	}
+
+	public Collection<ServerPlayer> getPlayers() {
+		return players.values();
 	}
 
 }

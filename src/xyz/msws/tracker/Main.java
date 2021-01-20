@@ -9,7 +9,6 @@ import java.io.IOException;
 public class Main {
 
 	public static void main(String[] args) {
-
 		File tokenFile = new File(System.getProperty("user.dir") + File.separator + "token.txt");
 		if (!tokenFile.exists()) {
 			try {

@@ -1,5 +1,6 @@
 package xyz.msws.tracker;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -11,14 +12,18 @@ import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
 import xyz.msws.tracker.data.ServerData;
+import xyz.msws.tracker.data.TrackerConfig;
 import xyz.msws.tracker.module.PlayerTrackerModule;
 import xyz.msws.tracker.trackers.CSGOTracker;
 import xyz.msws.tracker.trackers.Tracker;
 
 public class PlayerTracker extends Client {
 
+	private TrackerConfig config;
+
 	public PlayerTracker(String token) {
 		super(token);
+		this.config = new TrackerConfig(new File("config.txt"));
 	}
 
 	@Override
@@ -28,9 +33,7 @@ public class PlayerTracker extends Client {
 
 			Timer timer = new Timer();
 
-			List<ServerData> data = new ArrayList<ServerData>();
-			data.add(new ServerData("eGO JB", "74.91.113.83"));
-			data.add(new ServerData("eGO TTT", "74.91.113.113"));
+			List<ServerData> data = config.getServers();
 
 			modules.add(new PlayerTrackerModule(this, data));
 
@@ -58,7 +61,6 @@ public class PlayerTracker extends Client {
 		} catch (LoginException | InterruptedException e) {
 			e.printStackTrace();
 		}
-
 	}
 
 	@Override
