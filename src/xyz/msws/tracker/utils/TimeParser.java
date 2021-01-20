@@ -32,8 +32,17 @@ public class TimeParser {
 		} catch (NumberFormatException e) {
 			return d;
 		}
-
 		return d;
+	}
+
+	public static long getDate(String date) {
+		SimpleDateFormat format = new SimpleDateFormat("MM/dd/yy");
+		try {
+			return format.parse(date).toInstant().toEpochMilli();
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return 0;
 	}
 
 	public static String getDateDescription(long epoch) {

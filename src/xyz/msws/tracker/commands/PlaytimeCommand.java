@@ -6,7 +6,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.StringJoiner;
 
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
@@ -15,6 +14,7 @@ import xyz.msws.tracker.Client;
 import xyz.msws.tracker.data.ServerPlayer;
 import xyz.msws.tracker.data.pageable.PageableEmbed;
 import xyz.msws.tracker.module.PlayerTrackerModule;
+import xyz.msws.tracker.utils.MSG;
 import xyz.msws.tracker.utils.TimeParser;
 
 public class PlaytimeCommand extends AbstractCommand {
@@ -29,22 +29,62 @@ public class PlaytimeCommand extends AbstractCommand {
 
 	@Override
 	public void execute(Message message, String[] args) {
-		Map<ServerPlayer, Long> leaderboard = new LinkedHashMap<>();
-		tracker.getPlayers().forEach(p -> leaderboard.put(p, p.getPlaytimeSince(0)));
-		List<Entry<ServerPlayer, Long>> ranked = new ArrayList<>();
-		ranked.addAll(leaderboard.entrySet());
+		String server = null;
+		long from = 0, to = System.currentTimeMillis();
 
-		ranked.sort(new Comparator<Entry<ServerPlayer, Long>>() {
-
-			@Override
-			public int compare(Entry<ServerPlayer, Long> o1, Entry<ServerPlayer, Long> o2) {
-				return o1.getValue() == o2.getValue() ? 0 : o1.getValue() > o2.getValue() ? -1 : 1;
+		for (String s : tracker.getServerNames()) {
+			if (MSG.simplify(String.join("", args)).contains(MSG.simplify(s.replace(" ", "")))) {
+				server = s;
+				break;
 			}
-		});
+		}
 
+		for (String s : args) {
+			try {
+				long time = Long.parseLong(s) * 1000;
+
+				if (from == 0) {
+					from = System.currentTimeMillis() - time;
+				} else {
+					to = System.currentTimeMillis() - time;
+				}
+				continue;
+			} catch (NumberFormatException e) {
+			}
+			long time = TimeParser.getDate(s);
+			if (time != 0) {
+				if (from == 0) {
+					from = System.currentTimeMillis() - time;
+				} else {
+					to = System.currentTimeMillis() - time;
+				}
+				continue;
+			}
+
+			if (server == null)
+				message.getChannel().sendMessage("Unknown argument not a server, duration, or date : " + s).queue();
+		}
+
+		String duration = "over all time";
+		if (from != 0) {
+			duration = ("from " + TimeParser.getDateDescription(from));
+		}
+		if (System.currentTimeMillis() - to > 1000) {
+			duration += " to " + ((System.currentTimeMillis() - to < 1000) ? "now" : TimeParser.getDateDescription(to));
+		}
+
+		formatPlaytimes(getRankings(from, to, server), (server == null ? "All Servers" : server) + " times " + duration)
+				.bindTo(message.getAuthor()).send(message.getTextChannel());
+	}
+
+	private PageableEmbed formatPlaytimes(List<Entry<ServerPlayer, Long>> ranked, String title) {
+		return formatPlaytimes(ranked, title, 10);
+	}
+
+	private PageableEmbed formatPlaytimes(List<Entry<ServerPlayer, Long>> ranked, String title, int pageLines) {
 		List<MessageEmbed> lines = new ArrayList<>();
 
-		int pageLines = 10, maxPages = ranked.size() / pageLines + 1;
+		int maxPages = ranked.size() / pageLines + 1;
 
 		while (!ranked.isEmpty()) {
 			EmbedBuilder builder = new EmbedBuilder();
@@ -56,13 +96,44 @@ public class PlaytimeCommand extends AbstractCommand {
 				builder.appendDescription(String.format("%d. %s: %s\n", lines.size() * pageLines + i + 1, name,
 						TimeParser.getDurationDescription(time / 1000)));
 				builder.setFooter("Page " + (lines.size() + 1) + " of " + maxPages);
-				builder.setTitle("All Servers Leaderboard");
+				builder.setTitle(title);
 			}
 
 			lines.add(builder.build());
 		}
 
-		new PageableEmbed(client, lines).bindTo(message.getAuthor()).send(message.getTextChannel());
+		return new PageableEmbed(client, lines);
+	}
+
+	private Map<ServerPlayer, Long> getPlaytimes(long start, long end, String server) {
+		Map<ServerPlayer, Long> leaderboard = new LinkedHashMap<>();
+		tracker.getPlayers().forEach(p -> leaderboard.put(p, p.getPlaytimeDuring(start, end, server)));
+		return leaderboard;
+	}
+
+	private List<Entry<ServerPlayer, Long>> getRankings(long start, long end, String server,
+			Comparator<? super Entry<ServerPlayer, Long>> comp) {
+		List<Entry<ServerPlayer, Long>> ranked = new ArrayList<>();
+		ranked.addAll(getPlaytimes(start, end, server).entrySet());
+		ranked.sort(comp);
+		return ranked;
+	}
+
+	private List<Entry<ServerPlayer, Long>> getRankings(long start, long end, String server) {
+		return getRankings(start, end, server, new Comparator<Entry<ServerPlayer, Long>>() {
+			@Override
+			public int compare(Entry<ServerPlayer, Long> o1, Entry<ServerPlayer, Long> o2) {
+				return o1.getValue() == o2.getValue() ? 0 : o1.getValue() > o2.getValue() ? -1 : 1;
+			}
+		});
+	}
+
+	private List<Entry<ServerPlayer, Long>> getRankings(long start, long end) {
+		return getRankings(start, end, null);
+	}
+
+	private List<Entry<ServerPlayer, Long>> getRankings(long start) {
+		return getRankings(start, System.currentTimeMillis());
 	}
 
 }

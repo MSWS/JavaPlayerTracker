@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
+import java.util.stream.Collectors;
 
 import com.github.koraktor.steamcondenser.steam.servers.SourceServer;
 
@@ -37,7 +38,7 @@ public class PlayerTrackerModule extends Module {
 			players.put(sp.getRawName(), sp);
 		}
 
-		System.out.printf("Loaded %d files", players.size());
+		System.out.printf("Loaded %d files\n", players.size());
 	}
 
 	@Override
@@ -64,6 +65,14 @@ public class PlayerTrackerModule extends Module {
 
 	public Collection<ServerPlayer> getPlayers() {
 		return players.values();
+	}
+
+	public Collection<ServerData> getServers() {
+		return servers.keySet();
+	}
+
+	public List<String> getServerNames() {
+		return servers.keySet().stream().map(s -> s.getName()).collect(Collectors.toList());
 	}
 
 }
