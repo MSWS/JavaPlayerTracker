@@ -16,6 +16,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import xyz.msws.tracker.PlayerTracker;
+
 public class ServerData {
 	private String name, ip;
 	private int port;
@@ -34,7 +36,7 @@ public class ServerData {
 	}
 
 	public ServerData(String name, String ip) {
-		this.file = new File("servers" + File.separator + name + ".txt");
+		this.file = new File(PlayerTracker.SERVER_FILE, name + ".txt");
 		if (!file.getParentFile().exists())
 			file.getParentFile().mkdirs();
 
@@ -47,9 +49,10 @@ public class ServerData {
 		}
 
 		this.name = name;
+		loadData();
 	}
 
-	public boolean loadData() {
+	private boolean loadData() {
 		FileReader fread;
 		if (!file.exists())
 			return false;

@@ -17,6 +17,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import xyz.msws.tracker.PlayerTracker;
+
 public class ServerPlayer {
 	private final static Slugify slg = new Slugify();
 
@@ -24,21 +26,23 @@ public class ServerPlayer {
 	private File file;
 
 	private Map<String, LinkedHashMap<Long, Long>> times = new HashMap<String, LinkedHashMap<Long, Long>>();
+//	private long allTimeCached;  TODO: Implement cache
 
 	public ServerPlayer(String rawName) {
-		this.rawName = name;
+		this.rawName = rawName;
 		this.name = simplify(rawName);
 
-		file = new File("players" + File.separator + name + ".txt");
+		file = new File(PlayerTracker.PLAYER_FILE, name + ".txt");
 		if (!file.getParentFile().exists())
 			file.getParentFile().mkdirs();
 	}
 
 	public ServerPlayer(File file) {
 		this.file = file;
+		load();
 	}
 
-	public boolean load() {
+	private boolean load() {
 		if (!file.exists())
 			return false;
 		FileReader fread;
@@ -88,7 +92,9 @@ public class ServerPlayer {
 
 	public void saveData() {
 		JsonObject data = new JsonObject();
-		data.addProperty("name", name);
+		data.addProperty("name", rawName);
+		if (rawName == null)
+			System.out.printf("[WARNING] Saving %s's name as null\n", rawName);
 
 		JsonObject serverTimes = new JsonObject();
 		for (Entry<String, LinkedHashMap<Long, Long>> entry : times.entrySet()) {
@@ -157,6 +163,36 @@ public class ServerPlayer {
 			return false;
 		ServerPlayer sp = (ServerPlayer) obj;
 		return sp.getRawName().equals(this.getRawName());
+	}
+
+	public long getPlaytimeSince(long start) {
+		return getPlaytimeSince(start, null);
+	}
+
+	public long getPlaytimeSince(long start, String server) {
+		return getPlaytimeDuring(start, System.currentTimeMillis(), server);
+	}
+
+	public long getPlaytimeDuring(long start, long end) {
+		return getPlaytimeDuring(start, end, null);
+	}
+
+	public long getPlaytimeDuring(long start, long end, String server) {
+		long result = 0;
+		if (server == null) {
+			for (String k : this.times.keySet())
+				result += getPlaytimeDuring(start, end, k);
+			return result;
+		}
+		LinkedHashMap<Long, Long> times = this.times.getOrDefault(server, new LinkedHashMap<Long, Long>());
+		for (Entry<Long, Long> entry : times.entrySet()) {
+			if (entry.getKey() > end) {
+				// We've gone past the max limit specified by end
+				break;
+			}
+			result += (entry.getValue() == -1 ? System.currentTimeMillis() : entry.getValue()) - entry.getKey();
+		}
+		return result;
 	}
 
 }

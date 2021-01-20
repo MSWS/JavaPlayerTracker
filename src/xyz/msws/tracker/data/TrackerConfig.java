@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -15,8 +16,8 @@ import com.google.gson.JsonParser;
 public class TrackerConfig {
 
 	private File file;
-	private List<ServerData> servers;
-	private String channelName;
+	private List<ServerData> servers = new ArrayList<>();
+	private String channelName = "player-logs";
 
 	public TrackerConfig(File file) {
 		this.file = file;

@@ -1,5 +1,6 @@
 package xyz.msws.tracker.module;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.Timer;
 import com.github.koraktor.steamcondenser.steam.servers.SourceServer;
 
 import xyz.msws.tracker.Client;
+import xyz.msws.tracker.PlayerTracker;
 import xyz.msws.tracker.data.ServerData;
 import xyz.msws.tracker.data.ServerPlayer;
 
@@ -27,6 +29,15 @@ public class PlayerTrackerModule extends Module {
 	public void load() {
 		timer = new Timer();
 		servers.values().forEach(s -> timer.schedule(s, 0, 1000));
+
+		System.out.println("Loading all player files...");
+
+		for (File f : PlayerTracker.PLAYER_FILE.listFiles()) {
+			ServerPlayer sp = new ServerPlayer(f);
+			players.put(sp.getRawName(), sp);
+		}
+
+		System.out.printf("Loaded %d files", players.size());
 	}
 
 	@Override
@@ -47,7 +58,6 @@ public class PlayerTrackerModule extends Module {
 		if (players.containsKey(name))
 			return players.get(name);
 		ServerPlayer result = new ServerPlayer(name);
-		result.load();
 		players.put(name, result);
 		return result;
 	}
