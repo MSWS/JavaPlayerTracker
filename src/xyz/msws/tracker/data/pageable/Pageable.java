@@ -15,6 +15,13 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import xyz.msws.tracker.Client;
 import xyz.msws.tracker.data.Callback;
 
+/**
+ * Represents a pageable message
+ * 
+ * @author Isaac
+ *
+ * @param <T>
+ */
 public abstract class Pageable<T> extends ListenerAdapter implements List<T> {
 	protected List<T> pages;
 	protected int page;

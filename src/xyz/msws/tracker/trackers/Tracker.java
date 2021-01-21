@@ -7,7 +7,15 @@ import com.github.koraktor.steamcondenser.steam.servers.SourceServer;
 
 import xyz.msws.tracker.Client;
 import xyz.msws.tracker.data.ServerData;
+import xyz.msws.tracker.module.PlayerTrackerModule;
 
+/**
+ * Represents a timed task that queries the specified server and updates data
+ * through the {@link PlayerTrackerModule}
+ * 
+ * @author Isaac
+ *
+ */
 public abstract class Tracker extends TimerTask {
 
 	protected final ServerData server;

@@ -33,7 +33,7 @@ public class PageableText extends Pageable<Message> {
 		for (String s : pages)
 			this.pages.add(new MessageBuilder(s).build());
 	}
-	
+
 	public PageableText(Client client, List<String> pages) {
 		this(client);
 		this.pages = new ArrayList<>();

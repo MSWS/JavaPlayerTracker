@@ -19,13 +19,18 @@ import com.google.gson.JsonParser;
 import xyz.msws.tracker.PlayerTracker;
 import xyz.msws.tracker.utils.MSG;
 
+/**
+ * Encaplusates the data of a player, primarily playtime
+ * 
+ * @author Isaac
+ *
+ */
 public class ServerPlayer {
 
 	private String name, rawName;
 	private File file;
 
 	private Map<String, LinkedHashMap<Long, Long>> times = new HashMap<String, LinkedHashMap<Long, Long>>();
-//	private long allTimeCached;  TODO: Implement cache
 
 	public ServerPlayer(String rawName) {
 		this.rawName = rawName;
@@ -115,12 +120,22 @@ public class ServerPlayer {
 		}
 	}
 
+	/**
+	 * Marks the player as having logged on to a server
+	 * 
+	 * @param server
+	 */
 	public void logOn(ServerData server) {
 		LinkedHashMap<Long, Long> times = this.times.getOrDefault(server.getName(), new LinkedHashMap<Long, Long>());
 		times.put(System.currentTimeMillis(), -1L);
 		this.times.put(server.getName(), times);
 	}
 
+	/**
+	 * Marks the player as having logged off of the specified server
+	 * 
+	 * @param server
+	 */
 	public void logOff(ServerData server) {
 		if (this.times.get(server.getName()).isEmpty()) {
 			System.out.printf(
@@ -180,6 +195,15 @@ public class ServerPlayer {
 		return getPlaytimeDuring(start, end, null);
 	}
 
+	/**
+	 * Returns the given playtime of the player between the start and end
+	 * timestamps, if the player is currently on then that time is accounted for
+	 * 
+	 * @param start
+	 * @param end
+	 * @param server
+	 * @return
+	 */
 	public long getPlaytimeDuring(long start, long end, String server) {
 		long result = 0;
 		if (server == null) {

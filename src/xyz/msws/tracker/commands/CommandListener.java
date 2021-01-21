@@ -10,7 +10,7 @@ import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
 import xyz.msws.tracker.Client;
 
-public class CommandListener  {
+public class CommandListener {
 
 	private List<AbstractCommand> commands = new ArrayList<>();
 	private Client client;
@@ -78,7 +78,6 @@ public class CommandListener  {
 			timer.cancel();
 		}).start();
 
-		
 		timer.schedule(new TimerTask() {
 
 			@Override

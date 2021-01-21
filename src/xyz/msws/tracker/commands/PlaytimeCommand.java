@@ -40,29 +40,23 @@ public class PlaytimeCommand extends AbstractCommand {
 		}
 
 		for (String s : args) {
+			long time;
 			try {
-				long time = Long.parseLong(s) * 1000;
-
-				if (from == 0) {
-					from = System.currentTimeMillis() - time;
-				} else {
-					to = System.currentTimeMillis() - time;
-				}
-				continue;
+				time = Long.parseLong(s) * 1000;
 			} catch (NumberFormatException e) {
-			}
-			long time = TimeParser.getDate(s);
-			if (time != 0) {
-				if (from == 0) {
-					from = System.currentTimeMillis() - time;
-				} else {
-					to = System.currentTimeMillis() - time;
-				}
-				continue;
+				time = TimeParser.getDate(s);
 			}
 
-			if (server == null)
+			if (time == 0 && server == null) {
 				message.getChannel().sendMessage("Unknown argument not a server, duration, or date : " + s).queue();
+				continue;
+			}
+			if (from == 0) {
+				from = System.currentTimeMillis() - time;
+			} else {
+				to = System.currentTimeMillis() - time;
+			}
+
 		}
 
 		String duration = "over all time";
@@ -126,14 +120,6 @@ public class PlaytimeCommand extends AbstractCommand {
 				return o1.getValue() == o2.getValue() ? 0 : o1.getValue() > o2.getValue() ? -1 : 1;
 			}
 		});
-	}
-
-	private List<Entry<ServerPlayer, Long>> getRankings(long start, long end) {
-		return getRankings(start, end, null);
-	}
-
-	private List<Entry<ServerPlayer, Long>> getRankings(long start) {
-		return getRankings(start, System.currentTimeMillis());
 	}
 
 }

@@ -47,8 +47,5 @@ public class Main {
 
 		PlayerTracker client = new PlayerTracker(token);
 		client.start();
-
-//		SourceModBans client = new SourceModBans(token);
-//		client.start();
 	}
 }

@@ -33,14 +33,13 @@ public class PageableEmbed extends Pageable<MessageEmbed> {
 		for (String s : pages)
 			this.pages.add(new EmbedBuilder().setDescription(s).build());
 	}
-	
+
 	public PageableEmbed(Client client, List<String> pages) {
 		this(client);
 		this.pages = new ArrayList<>();
 		for (String s : pages)
 			this.pages.add(new EmbedBuilder().setDescription(s).build());
 	}
-
 
 	public void send(TextChannel channel, int page) {
 		if (id != 0) {

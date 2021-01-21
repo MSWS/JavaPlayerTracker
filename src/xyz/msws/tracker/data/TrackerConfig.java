@@ -13,6 +13,12 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+/**
+ * Support for specifying servers from a config file
+ * 
+ * @author Isaac
+ *
+ */
 public class TrackerConfig {
 
 	private File file;

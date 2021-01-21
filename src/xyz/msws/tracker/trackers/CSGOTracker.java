@@ -3,6 +3,8 @@ package xyz.msws.tracker.trackers;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.TimeoutException;
 
 import com.github.koraktor.steamcondenser.exceptions.SteamCondenserException;
@@ -18,6 +20,17 @@ public class CSGOTracker extends Tracker {
 	public CSGOTracker(Client client, ServerData server) {
 		super(client, server);
 		tracker = client.getModule(PlayerTrackerModule.class);
+
+		new Timer().schedule(new TimerTask() {
+			@Override
+			public void run() {
+				try {
+					connection.updateServerInfo();
+				} catch (SteamCondenserException | TimeoutException e) {
+					e.printStackTrace();
+				}
+			}
+		}, 0, 1000 * 60 * 5);
 	}
 
 	private Set<String> oldPlayers = new HashSet<>();
@@ -27,7 +40,6 @@ public class CSGOTracker extends Tracker {
 		try {
 			connection.updatePlayers();
 			connection.updatePing();
-			connection.updateServerInfo();
 			Set<String> unparsed = connection.getPlayers().keySet();
 			Iterator<String> it = unparsed.iterator();
 			while (it.hasNext()) {
@@ -36,15 +48,10 @@ public class CSGOTracker extends Tracker {
 					oldPlayers.remove(s);
 					continue;
 				}
-				System.out.printf("%s logged on to %s\n", s, server.getName());
 				tracker.getPlayer(s).logOn(server);
 			}
 
-			oldPlayers.forEach(s -> {
-				System.out.printf("%s logged off of %s\n", s, server.getName());
-				tracker.getPlayer(s).logOff(server);
-			});
-
+			oldPlayers.forEach(s -> tracker.getPlayer(s).logOff(server));
 			oldPlayers = connection.getPlayers().keySet();
 
 			server.addMap(connection.getServerInfo().get("mapName") + "");

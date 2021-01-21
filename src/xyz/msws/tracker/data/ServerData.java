@@ -18,6 +18,12 @@ import com.google.gson.JsonParser;
 
 import xyz.msws.tracker.PlayerTracker;
 
+/**
+ * Encapsulates server data including server name, ip, port, and map history
+ * 
+ * @author Isaac
+ *
+ */
 public class ServerData {
 	private String name, ip;
 	private int port;
@@ -30,11 +36,26 @@ public class ServerData {
 		this.file = file;
 	}
 
+	/**
+	 * Alias for alternative constructor to add support to differentiate between ip
+	 * and port
+	 * 
+	 * @param name
+	 * @param ip
+	 * @param port
+	 */
 	public ServerData(String name, String ip, int port) {
 		this(name, ip);
 		this.port = port;
 	}
 
+	/**
+	 * Creates a ServerData instance give the server name and ip Manually loads the
+	 * data from the file if it exists
+	 * 
+	 * @param name Name of the server
+	 * @param ip   ip of the server, can include a colon to separate ip and port
+	 */
 	public ServerData(String name, String ip) {
 		this.file = new File(PlayerTracker.SERVER_FILE, name + ".txt");
 		if (!file.getParentFile().exists())
@@ -52,6 +73,11 @@ public class ServerData {
 		loadData();
 	}
 
+	/**
+	 * Loads the data from the file
+	 * 
+	 * @return
+	 */
 	private boolean loadData() {
 		FileReader fread;
 		if (!file.exists())
