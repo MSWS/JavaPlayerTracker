@@ -12,15 +12,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.github.slugify.Slugify;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import xyz.msws.tracker.PlayerTracker;
+import xyz.msws.tracker.utils.MSG;
 
 public class ServerPlayer {
-	private final static Slugify slg = new Slugify();
 
 	private String name, rawName;
 	private File file;
@@ -30,7 +29,7 @@ public class ServerPlayer {
 
 	public ServerPlayer(String rawName) {
 		this.rawName = rawName;
-		this.name = simplify(rawName);
+		this.name = MSG.simplify(rawName);
 
 		file = new File(PlayerTracker.PLAYER_FILE, name + ".txt");
 		if (!file.getParentFile().exists())
@@ -59,7 +58,7 @@ public class ServerPlayer {
 
 			JsonObject dat = obj.getAsJsonObject();
 			rawName = dat.get("name").getAsString();
-			name = simplify(rawName);
+			name = MSG.simplify(rawName);
 
 			JsonElement timeData = dat.get("time");
 			if (!timeData.isJsonObject()) {
@@ -124,8 +123,10 @@ public class ServerPlayer {
 
 	public void logOff(ServerData server) {
 		if (this.times.get(server.getName()).isEmpty()) {
-			System.out
-					.println("[WARNING] Desynchronization of player tracking, attempted to logOff when not logged on");
+			System.out.printf(
+					"[WARNING] Desynchronization of player tracking, attempted to logOff %s when not logged on\n",
+					rawName);
+			System.out.println("Error type: empty");
 			return;
 		}
 		List<Entry<Long, Long>> sessions = new ArrayList<>();
@@ -133,9 +134,15 @@ public class ServerPlayer {
 
 		times.entrySet().forEach(e -> sessions.add(e));
 
-		if (sessions.get(sessions.size() - 1).getValue() != -1) {
-			System.out
-					.println("[WARNING] Desynchronization of player tracking, attempted to logOff when not logged on");
+		Entry<Long, Long> entry = sessions.get(sessions.size() - 1);
+
+		if (entry.getValue() != -1) {
+			System.out.printf(
+					"[WARNING] Desynchronization of player tracking, attempted to logOff %s when not logged on\n",
+					rawName);
+			System.out.println("Error type: -1");
+			System.out.println("Actual value: " + entry.getValue() + " key: " + entry.getKey() + " (time ago: "
+					+ (System.currentTimeMillis() - entry.getKey()) + ")");
 			return;
 		}
 
@@ -149,10 +156,6 @@ public class ServerPlayer {
 
 	public String getRawName() {
 		return rawName;
-	}
-
-	public static String simplify(String name) {
-		return slg.slugify(name);
 	}
 
 	@Override

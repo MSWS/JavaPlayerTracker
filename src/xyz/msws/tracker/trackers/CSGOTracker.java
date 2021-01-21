@@ -24,9 +24,10 @@ public class CSGOTracker extends Tracker {
 
 	@Override
 	public void run() {
-		System.out.println("Grabbing server info of " + server.getName());
 		try {
 			connection.updatePlayers();
+			connection.updatePing();
+			connection.updateServerInfo();
 			Set<String> unparsed = connection.getPlayers().keySet();
 			Iterator<String> it = unparsed.iterator();
 			while (it.hasNext()) {

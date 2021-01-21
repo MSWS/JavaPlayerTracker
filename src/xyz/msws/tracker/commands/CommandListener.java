@@ -7,10 +7,10 @@ import java.util.TimerTask;
 
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.hooks.SubscribeEvent;
 import xyz.msws.tracker.Client;
 
-public class CommandListener extends ListenerAdapter {
+public class CommandListener  {
 
 	private List<AbstractCommand> commands = new ArrayList<>();
 	private Client client;
@@ -39,7 +39,7 @@ public class CommandListener extends ListenerAdapter {
 		return commands;
 	}
 
-	@Override
+	@SubscribeEvent
 	public void onMessageReceived(MessageReceivedEvent event) {
 		if (event.getAuthor().getIdLong() == client.getJDA().getSelfUser().getIdLong())
 			return;

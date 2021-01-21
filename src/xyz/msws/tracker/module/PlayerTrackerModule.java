@@ -10,6 +10,8 @@ import java.util.stream.Collectors;
 
 import com.github.koraktor.steamcondenser.steam.servers.SourceServer;
 
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.TextChannel;
 import xyz.msws.tracker.Client;
 import xyz.msws.tracker.PlayerTracker;
 import xyz.msws.tracker.data.ServerData;
@@ -29,7 +31,14 @@ public class PlayerTrackerModule extends Module {
 	@Override
 	public void load() {
 		timer = new Timer();
-		servers.values().forEach(s -> timer.schedule(s, 0, 1000));
+
+		String chan = (client instanceof PlayerTracker) ? ((PlayerTracker) client).getConfig().getChannelName()
+				: "player-logs";
+		TextChannel channel = client.getJDA().getTextChannelsByName(chan, true).get(0);
+
+		purge(channel);
+
+		servers.values().forEach(s -> timer.schedule(s, 0, 1000 * 30));
 
 		System.out.println("Loading all player files...");
 
@@ -39,6 +48,15 @@ public class PlayerTrackerModule extends Module {
 		}
 
 		System.out.printf("Loaded %d files\n", players.size());
+	}
+
+	private void purge(TextChannel channel) {
+		List<Message> messages = channel.getHistory().retrievePast(100).complete();
+		if (messages.size() < 2) {
+			messages.forEach(m -> m.delete().queue());
+			return;
+		}
+		channel.deleteMessages(messages).queue();
 	}
 
 	@Override
