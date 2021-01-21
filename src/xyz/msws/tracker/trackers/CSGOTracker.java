@@ -30,7 +30,7 @@ public class CSGOTracker extends Tracker {
 					e.printStackTrace();
 				}
 			}
-		}, 0, 1000 * 60 * 5);
+		}, 1000, 1000 * 60 * 5);
 	}
 
 	private Set<String> oldPlayers = new HashSet<>();
