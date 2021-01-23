@@ -151,9 +151,9 @@ public class ServerPlayer {
 	 * @param server
 	 */
 	public void logOff(ServerData server) {
-		if (this.times.get(server.getName()).isEmpty()) {
+		if (this.times.getOrDefault(server.getName(), new LinkedHashMap<>()).isEmpty()) {
 			Logger.logf("[WARNING] Desynchronization of player tracking, attempted to logOff %s when not logged on",
-					rawName);
+					rawName + "");
 			Logger.logf("Error type: empty");
 			return;
 		}
@@ -229,6 +229,8 @@ public class ServerPlayer {
 				// We've gone past the max limit specified by end
 				break;
 			}
+			if (entry.getValue() < start)
+				continue;
 			result += (entry.getValue() == -1 ? System.currentTimeMillis() : entry.getValue()) - entry.getKey();
 		}
 		return result;

@@ -48,6 +48,8 @@ public class CSGOTracker extends Tracker {
 					oldPlayers.remove(s);
 					continue;
 				}
+				if (s.isEmpty() || s == null)
+					continue;
 				tracker.getPlayer(s).logOn(server);
 			}
 
