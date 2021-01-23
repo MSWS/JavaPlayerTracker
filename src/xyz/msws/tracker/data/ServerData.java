@@ -107,6 +107,7 @@ public class ServerData {
 			}
 
 			JsonObject mapObj = mapData.getAsJsonObject();
+			long big = 0;
 			for (Entry<String, JsonElement> entry : mapObj.entrySet()) {
 				Set<Long> times = new HashSet<>();
 				if (!entry.getValue().isJsonArray()) {
@@ -118,6 +119,10 @@ public class ServerData {
 						Logger.logf("Timing report %s from map %s in file %s is malformed", p.toString(),
 								entry.getKey(), file.getName());
 						continue;
+					}
+					if (p.getAsLong() > big) {
+						lastMap = entry.getKey();
+						big = p.getAsLong();
 					}
 					times.add(p.getAsLong());
 				}
