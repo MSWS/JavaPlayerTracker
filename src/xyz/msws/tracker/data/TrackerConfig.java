@@ -5,8 +5,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import com.google.gson.JsonElement;
@@ -24,8 +24,8 @@ import xyz.msws.tracker.utils.Logger;
 public class TrackerConfig {
 
 	private File file;
-	private List<ServerData> servers = new ArrayList<>();
-	private String channelName = "player-logs";
+//	private List<ServerData> servers = new ArrayList<>();
+	private Map<ServerData, String> servers = new HashMap<>();
 
 	public TrackerConfig(File file) {
 		Logger.logf("Creating new tracker config from %s (%s)", file.getName(), file.getAbsolutePath());
@@ -43,10 +43,15 @@ public class TrackerConfig {
 				return;
 			JsonObject serverObj = obj.get("servers").getAsJsonObject();
 			for (Entry<String, JsonElement> entry : serverObj.entrySet()) {
-				servers.add(new ServerData(entry.getKey(), entry.getValue().getAsString()));
+				if (!(entry.getValue().isJsonObject())) {
+					Logger.logf("%s is not a json object", entry.getKey());
+					continue;
+				}
+				JsonObject serverEntry = entry.getValue().getAsJsonObject();
+				String ip = serverEntry.get("ip").getAsString();
+				String channel = serverEntry.get("channel").getAsString();
+				servers.put(new ServerData(entry.getKey(), ip), channel);
 			}
-
-			channelName = obj.get("channelName").getAsString();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -55,10 +60,15 @@ public class TrackerConfig {
 	public void save() {
 		Logger.log("Saving Tracker Config...");
 		JsonObject data = new JsonObject();
-		JsonObject servers = new JsonObject();
-		this.servers.forEach(s -> servers.addProperty(s.getName(), s.toString()));
-		data.add("servers", servers);
-		data.addProperty("channelName", channelName);
+
+		JsonObject map = new JsonObject();
+		for (Entry<ServerData, String> entry : servers.entrySet()) {
+			JsonObject s = new JsonObject();
+			s.addProperty("ip", entry.getKey().getIp());
+			s.addProperty("channel", entry.getValue());
+			map.add(entry.getKey().getName(), s);
+		}
+		data.add("servers", map);
 
 		try (FileWriter writer = new FileWriter(file)) {
 			writer.write(data.toString());
@@ -67,20 +77,16 @@ public class TrackerConfig {
 		}
 	}
 
-	public List<ServerData> getServers() {
+	public String getChannel(ServerData data) {
+		return servers.getOrDefault(data, "unset");
+	}
+
+	public Map<ServerData, String> getServers() {
 		return servers;
 	}
 
-	public String getChannelName() {
-		return channelName;
-	}
-
-	public void addServer(ServerData data) {
-		servers.add(data);
-	}
-
-	public void setServers(List<ServerData> data) {
-		this.servers = data;
+	public void addServer(ServerData data, String channel) {
+		servers.put(data, channel);
 	}
 
 	public void clearServers() {

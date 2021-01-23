@@ -48,7 +48,8 @@ public class ServerStatus extends TimerTask {
 	@Override
 	public void run() {
 		if (channel == null) {
-			String chan = (client instanceof PlayerTracker) ? ((PlayerTracker) client).getConfig().getChannelName()
+			String chan = (client instanceof PlayerTracker)
+					? ((PlayerTracker) client).getConfig().getChannel(data)
 					: "player-logs";
 			channel = client.getJDA().getTextChannelsByName(chan, true).get(0);
 		}

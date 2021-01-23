@@ -77,7 +77,8 @@ public class PlayerTracker extends Client {
 	private void startTimers() {
 		Timer timer = new Timer();
 
-		List<ServerData> data = config.getServers();
+		List<ServerData> data = new ArrayList<>();
+		data.addAll(config.getServers().keySet());
 
 		modules.add(new PlayerTrackerModule(this, data));
 

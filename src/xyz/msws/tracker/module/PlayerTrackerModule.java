@@ -37,11 +37,12 @@ public class PlayerTrackerModule extends Module {
 	public void load() {
 		timer = new Timer();
 
-		String chan = (client instanceof PlayerTracker) ? ((PlayerTracker) client).getConfig().getChannelName()
-				: "player-logs";
-		TextChannel channel = client.getJDA().getTextChannelsByName(chan, true).get(0);
-
-		purge(channel);
+		for (ServerData d : servers.keySet()) {
+			String chan = (client instanceof PlayerTracker) ? ((PlayerTracker) client).getConfig().getChannel(d)
+					: "player-logs";
+			TextChannel channel = client.getJDA().getTextChannelsByName(chan, true).get(0);
+			purge(channel);
+		}
 
 		servers.values().forEach(s -> timer.schedule(s, 0, 1000 * 30));
 
@@ -92,7 +93,7 @@ public class PlayerTrackerModule extends Module {
 	public Collection<ServerPlayer> getPlayers() {
 		return players.values();
 	}
-	
+
 	public Set<String> getPlayerNames() {
 		return players.keySet();
 	}
