@@ -147,9 +147,6 @@ public class ServerPlayer {
 		LinkedHashMap<Long, Long> times = this.times.getOrDefault(server.getName(), new LinkedHashMap<Long, Long>());
 		times.put(System.currentTimeMillis(), -1L);
 		this.times.put(server.getName(), times);
-		for (Entry<Long, Long> v : this.times.get(server.getName()).entrySet()) {
-			Logger.logf("%d: %d", v.getKey(), v.getValue());
-		}
 	}
 
 	/**
