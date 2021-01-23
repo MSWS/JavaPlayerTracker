@@ -8,6 +8,8 @@ import java.util.List;
 import net.dv8tion.jda.api.MessageBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
+import net.dv8tion.jda.api.hooks.SubscribeEvent;
 import xyz.msws.tracker.Client;
 
 public class PageableText extends Pageable<Message> {
@@ -42,47 +44,9 @@ public class PageableText extends Pageable<Message> {
 	}
 
 	public void send(TextChannel channel, int page) {
-		if (this.id != 0) {
+
+		if (id != 0) {
 			channel.editMessageById(id, pages.get(page)).queue();
-
-			channel.retrieveMessageById(this.id).queue(m -> {
-				if (this.page < 5) {
-					m.removeReaction("⏪").queue();
-					if (this.page <= 1) {
-						m.removeReaction("⬅").queue();
-						if (this.page == 0)
-							m.removeReaction("◀").queue();
-					}
-				}
-
-				if (this.page > pages.size() - 5) {
-					m.removeReaction("⏩").queue();
-					if (this.page >= pages.size() - 2) {
-						m.removeReaction("➡").queue();
-						if (this.page == pages.size() - 1)
-							m.removeReaction("▶").queue();
-					}
-				}
-
-				if (this.page > 0) {
-					m.addReaction("◀").queue();
-					if (this.page > 1) {
-						m.addReaction("⬅").queue();
-					}
-					if (this.page > 5)
-						m.addReaction("⏪").queue();
-				}
-
-				if (this.page < pages.size() - 1) {
-					m.addReaction("▶").queue();
-					if (this.page < pages.size() - 2) {
-						m.addReaction("➡").queue();
-						if (this.page < pages.size() - 5)
-							m.addReaction("⏩").queue();
-					}
-				}
-
-			});
 			return;
 		}
 
@@ -91,23 +55,21 @@ public class PageableText extends Pageable<Message> {
 			this.id = m.getIdLong();
 			for (String s : confirms.keySet())
 				m.addReaction(s).queue();
-			if (this.page > 0) {
-				m.addReaction("◀").queue();
-				if (this.page > 1) {
-					m.addReaction("⬅").queue();
-				}
-				if (this.page > 5)
-					m.addReaction("⏪").queue();
-			}
 
-			if (this.page < pages.size() - 1) {
-				m.addReaction("▶").queue();
-				if (this.page < pages.size() - 2) {
-					m.addReaction("➡").queue();
-					if (this.page < pages.size() - 5)
-						m.addReaction("⏩").queue();
-				}
-			}
+			m.addReaction("⏪").queue();
+			m.addReaction("⬅").queue();
+			m.addReaction("◀").queue();
+
+			m.addReaction("❌").queue();
+
+			m.addReaction("▶").queue();
+			m.addReaction("➡").queue();
+			m.addReaction("⏩").queue();
 		});
+	}
+
+	@SubscribeEvent
+	public void onMessageReaction(GuildMessageReactionAddEvent event) {
+		onGuildMessageReactionAdd(event);
 	}
 }

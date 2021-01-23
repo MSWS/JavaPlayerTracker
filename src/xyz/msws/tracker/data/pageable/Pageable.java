@@ -56,6 +56,9 @@ public abstract class Pageable<T> implements List<T> {
 	}
 
 	@SubscribeEvent
+	public abstract void onMessageReaction(GuildMessageReactionAddEvent event);
+
+	@SubscribeEvent
 	public void onGuildMessageReactionAdd(GuildMessageReactionAddEvent event) {
 		ReactionEmote react = event.getReactionEmote();
 		if (event.getUserIdLong() == client.getJDA().getSelfUser().getIdLong())
