@@ -13,8 +13,10 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.hooks.AnnotatedEventManager;
 import net.dv8tion.jda.api.hooks.IEventManager;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
+import xyz.msws.tracker.commands.HelpCommand;
 import xyz.msws.tracker.commands.LogsCommand;
 import xyz.msws.tracker.commands.PlaytimeCommand;
+import xyz.msws.tracker.commands.StatisticsCommand;
 import xyz.msws.tracker.data.ServerData;
 import xyz.msws.tracker.data.TrackerConfig;
 import xyz.msws.tracker.module.PlayerTrackerModule;
@@ -52,14 +54,17 @@ public class PlayerTracker extends Client {
 			Logger.log("Starting timers...");
 			startTimers();
 			jda.awaitReady();
-			Logger.log("Loading modules...");
-			loadModules();
 
 			Logger.log("Registering commands");
 			commands.registerCommand(new PlaytimeCommand(this, "playtime"));
-			commands.registerCommand(new LogsCommand(null, "logs"));
+			commands.registerCommand(new LogsCommand(this, "logs"));
+			commands.registerCommand(new StatisticsCommand(this, "statistics"));
+			commands.registerCommand(new HelpCommand(this, "help"));
 			Logger.logf("Successfully registered %d command%s", commands.getCommands().size(),
 					commands.getCommands().size() == 1 ? "" : "s");
+
+			Logger.log("Loading modules...");
+			loadModules();
 
 			jda.getPresence().setActivity(Activity.watching("CS:GO Servers"));
 			MessageAction.setDefaultMentions(new ArrayList<>()); // Prevent the bot from messaging others (prevents

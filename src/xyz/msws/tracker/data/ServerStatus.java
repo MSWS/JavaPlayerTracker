@@ -1,4 +1,4 @@
-package xyz.msws.tracker.module;
+package xyz.msws.tracker.data;
 
 import java.awt.Color;
 import java.util.HashMap;
@@ -19,7 +19,6 @@ import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
 import xyz.msws.tracker.Client;
 import xyz.msws.tracker.PlayerTracker;
-import xyz.msws.tracker.data.ServerData;
 import xyz.msws.tracker.utils.TimeParser;
 
 public class ServerStatus extends TimerTask {

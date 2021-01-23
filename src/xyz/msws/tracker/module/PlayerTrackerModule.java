@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Timer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -18,6 +19,7 @@ import xyz.msws.tracker.Client;
 import xyz.msws.tracker.PlayerTracker;
 import xyz.msws.tracker.data.ServerData;
 import xyz.msws.tracker.data.ServerPlayer;
+import xyz.msws.tracker.data.ServerStatus;
 import xyz.msws.tracker.utils.Logger;
 
 public class PlayerTrackerModule extends Module {
@@ -89,6 +91,10 @@ public class PlayerTrackerModule extends Module {
 
 	public Collection<ServerPlayer> getPlayers() {
 		return players.values();
+	}
+	
+	public Set<String> getPlayerNames() {
+		return players.keySet();
 	}
 
 	public Collection<ServerData> getServers() {

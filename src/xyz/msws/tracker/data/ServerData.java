@@ -175,6 +175,10 @@ public class ServerData {
 		maps.put(mapName, values);
 	}
 
+	public Map<String, Set<Long>> getMaps() {
+		return maps;
+	}
+
 	@Override
 	public String toString() {
 		return getIp() + ":" + getPort();

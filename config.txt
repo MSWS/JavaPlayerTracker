@@ -1,1 +1,1 @@
-{"servers":{"eGO JB":"74.91.113.83:27015","eGO TTT":"74.91.113.113:27015"},"channelName":"player-logs"}
+{"servers":{"eGO JB":"74.91.113.83:27015","eGO TTT":"74.91.113.113:27015","DEFY-TTT":"172.96.139.28:27015","DEFY-Surf":"172.96.139.29:27015"},"channelName":"player-logs"}
