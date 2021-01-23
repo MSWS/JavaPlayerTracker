@@ -6,7 +6,7 @@ import java.io.IOException;
 
 import net.dv8tion.jda.api.entities.Message;
 import xyz.msws.tracker.Client;
-import xyz.msws.tracker.Logger;
+import xyz.msws.tracker.utils.Logger;
 
 public class LogsCommand extends AbstractCommand {
 

@@ -13,6 +13,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import xyz.msws.tracker.utils.Logger;
+
 /**
  * Support for specifying servers from a config file
  * 
@@ -26,6 +28,7 @@ public class TrackerConfig {
 	private String channelName = "player-logs";
 
 	public TrackerConfig(File file) {
+		Logger.logf("Creating new tracker config from %s (%s)", file.getName(), file.getAbsolutePath());
 		this.file = file;
 		FileReader fread;
 		if (!file.exists())
@@ -50,6 +53,7 @@ public class TrackerConfig {
 	}
 
 	public void save() {
+		Logger.log("Saving Tracker Config...");
 		JsonObject data = new JsonObject();
 		JsonObject servers = new JsonObject();
 		this.servers.forEach(s -> servers.addProperty(s.getName(), s.toString()));

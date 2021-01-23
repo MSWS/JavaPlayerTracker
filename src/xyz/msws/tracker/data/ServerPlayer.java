@@ -16,8 +16,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import xyz.msws.tracker.Logger;
 import xyz.msws.tracker.PlayerTracker;
+import xyz.msws.tracker.utils.Logger;
 import xyz.msws.tracker.utils.MSG;
 
 /**
@@ -56,6 +56,10 @@ public class ServerPlayer {
 			BufferedReader reader = new BufferedReader(fread);
 			String data = reader.readLine();
 			reader.close();
+			if (data == null) {
+				Logger.logf("%s's data is null", file.getName());
+				return false;
+			}
 			JsonElement obj = JsonParser.parseString(data);
 			if (!obj.isJsonObject()) {
 				Logger.logf("Json data from file %s is invalid", file.getName());
@@ -63,6 +67,15 @@ public class ServerPlayer {
 			}
 
 			JsonObject dat = obj.getAsJsonObject();
+			if (!dat.has("name")) {
+				Logger.logf("Json data from file %s does not have name", file.getName());
+				return false;
+			}
+			if (dat.get("name").isJsonNull()) {
+				Logger.logf("Json data from file %s has null name", file.getName());
+				return false;
+			}
+
 			rawName = dat.get("name").getAsString();
 			name = MSG.simplify(rawName);
 
@@ -97,9 +110,9 @@ public class ServerPlayer {
 
 	public void saveData() {
 		JsonObject data = new JsonObject();
-		data.addProperty("name", rawName);
 		if (rawName == null)
-			Logger.logf("[WARNING] Saving %s's name as null", rawName);
+			return;
+		data.addProperty("name", rawName);
 
 		JsonObject serverTimes = new JsonObject();
 		for (Entry<String, LinkedHashMap<Long, Long>> entry : times.entrySet()) {

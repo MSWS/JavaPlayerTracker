@@ -3,9 +3,11 @@ package xyz.msws.tracker.module;
 import java.io.File;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import com.github.koraktor.steamcondenser.steam.servers.SourceServer;
@@ -13,13 +15,13 @@ import com.github.koraktor.steamcondenser.steam.servers.SourceServer;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import xyz.msws.tracker.Client;
-import xyz.msws.tracker.Logger;
 import xyz.msws.tracker.PlayerTracker;
 import xyz.msws.tracker.data.ServerData;
 import xyz.msws.tracker.data.ServerPlayer;
+import xyz.msws.tracker.utils.Logger;
 
 public class PlayerTrackerModule extends Module {
-	private Map<String, ServerPlayer> players = new HashMap<>();
+	private Map<String, ServerPlayer> players = new ConcurrentHashMap<>();
 	private Map<ServerData, ServerStatus> servers = new HashMap<>();
 
 	public PlayerTrackerModule(Client client, List<ServerData> servers) {
@@ -45,6 +47,8 @@ public class PlayerTrackerModule extends Module {
 
 		for (File f : PlayerTracker.PLAYER_FILE.listFiles()) {
 			ServerPlayer sp = new ServerPlayer(f);
+			if (sp.getRawName() == null)
+				continue;
 			players.put(sp.getRawName(), sp);
 		}
 
@@ -67,7 +71,8 @@ public class PlayerTrackerModule extends Module {
 	}
 
 	public void save() {
-		players.values().forEach(ServerPlayer::saveData);
+		Iterator<ServerPlayer> it = players.values().iterator();
+		it.forEachRemaining(ServerPlayer::saveData);
 	}
 
 	public void update(ServerData server, SourceServer data) {

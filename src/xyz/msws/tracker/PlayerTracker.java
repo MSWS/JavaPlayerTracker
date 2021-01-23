@@ -13,12 +13,14 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.hooks.AnnotatedEventManager;
 import net.dv8tion.jda.api.hooks.IEventManager;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
+import xyz.msws.tracker.commands.LogsCommand;
 import xyz.msws.tracker.commands.PlaytimeCommand;
 import xyz.msws.tracker.data.ServerData;
 import xyz.msws.tracker.data.TrackerConfig;
 import xyz.msws.tracker.module.PlayerTrackerModule;
 import xyz.msws.tracker.trackers.CSGOTracker;
 import xyz.msws.tracker.trackers.Tracker;
+import xyz.msws.tracker.utils.Logger;
 
 /**
  * Tracks players on source servers
@@ -43,14 +45,21 @@ public class PlayerTracker extends Client {
 			this.jda = JDABuilder.createDefault(token).build();
 
 			events = new AnnotatedEventManager();
+			Logger.log("Setting up events...");
 			jda.setEventManager(events);
 			jda.addEventListener(commands);
 
+			Logger.log("Starting timers...");
 			startTimers();
 			jda.awaitReady();
+			Logger.log("Loading modules...");
 			loadModules();
 
+			Logger.log("Registering commands");
 			commands.registerCommand(new PlaytimeCommand(this, "playtime"));
+			commands.registerCommand(new LogsCommand(null, "logs"));
+			Logger.logf("Successfully registered %d command%s", commands.getCommands().size(),
+					commands.getCommands().size() == 1 ? "" : "s");
 
 			jda.getPresence().setActivity(Activity.watching("CS:GO Servers"));
 			MessageAction.setDefaultMentions(new ArrayList<>()); // Prevent the bot from messaging others (prevents

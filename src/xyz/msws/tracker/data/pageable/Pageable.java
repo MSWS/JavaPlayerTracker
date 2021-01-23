@@ -13,8 +13,8 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import xyz.msws.tracker.Client;
-import xyz.msws.tracker.Logger;
 import xyz.msws.tracker.data.Callback;
+import xyz.msws.tracker.utils.Logger;
 
 /**
  * Represents a pageable message

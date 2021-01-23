@@ -9,7 +9,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
 import xyz.msws.tracker.Client;
-import xyz.msws.tracker.Logger;
+import xyz.msws.tracker.utils.Logger;
 
 public class CommandListener {
 

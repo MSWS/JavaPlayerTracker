@@ -16,8 +16,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import xyz.msws.tracker.Logger;
 import xyz.msws.tracker.PlayerTracker;
+import xyz.msws.tracker.utils.Logger;
 
 /**
  * Encapsulates server data including server name, ip, port, and map history
@@ -80,6 +80,7 @@ public class ServerData {
 	 * @return
 	 */
 	private boolean loadData() {
+		Logger.logf("Loading server data of %s", name);
 		FileReader fread;
 		if (!file.exists())
 			return false;
@@ -130,6 +131,7 @@ public class ServerData {
 	}
 
 	public void saveData() {
+		Logger.logf("Saving server data of %s", name);
 		JsonObject data = new JsonObject();
 		data.addProperty("name", name);
 		data.addProperty("ip", ip);
