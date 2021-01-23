@@ -136,7 +136,6 @@ public class ServerData {
 	}
 
 	public void saveData() {
-		Logger.logf("Saving server data of %s", name);
 		JsonObject data = new JsonObject();
 		data.addProperty("name", name);
 		data.addProperty("ip", ip);

@@ -31,6 +31,7 @@ public class PlaytimeCommand extends AbstractCommand {
 	public void execute(Message message, String[] args) {
 		String server = null;
 		long from = 0, to = System.currentTimeMillis();
+		boolean setTo = false, setFrom = false;
 
 		for (String s : tracker.getServerNames()) {
 			if (MSG.simplify(String.join("", args)).contains(MSG.simplify(s.replace(" ", "")))) {
@@ -42,29 +43,33 @@ public class PlaytimeCommand extends AbstractCommand {
 		for (String s : args) {
 			long time;
 			try {
-				time = Long.parseLong(s) * 1000;
+				time = Long.parseLong(s) * 1000 * 60;
 			} catch (NumberFormatException e) {
 				time = TimeParser.getDate(s);
 			}
 
-			if (time == 0 && server == null) {
-				message.getChannel().sendMessage("Unknown argument not a server, duration, or date : " + s).queue();
+			if (time == 0) {
+				if (server == null)
+					message.getChannel().sendMessage("Unknown argument not a server, duration, or date : " + s).queue();
 				continue;
 			}
-			if (from == 0) {
+			if (!setFrom) {
 				from = System.currentTimeMillis() - time;
-			} else {
+				setFrom = true;
+			} else if (!setTo) {
 				to = System.currentTimeMillis() - time;
+				setTo = true;
+			} else {
+				message.getChannel().sendMessage("Unnecessary extra parameter: " + s).queue();
 			}
-
 		}
 
 		String duration = "over all time";
 		if (from != 0) {
-			duration = ("from " + TimeParser.getDateDescription(from));
+			duration = ("from " + TimeParser.getDurationDescription((System.currentTimeMillis() - from) / 1000));
 		}
-		if (System.currentTimeMillis() - to > 1000) {
-			duration += " to " + ((System.currentTimeMillis() - to < 1000) ? "now" : TimeParser.getDateDescription(to));
+		if (setTo) {
+			duration += " to " + (setFrom ? TimeParser.getDateDescription(to) : "now");
 		}
 
 		formatPlaytimes(getRankings(from, to, server), (server == null ? "All Servers" : server) + " times " + duration)

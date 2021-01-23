@@ -234,13 +234,19 @@ public class ServerPlayer {
 		}
 		LinkedHashMap<Long, Long> times = this.times.getOrDefault(server, new LinkedHashMap<Long, Long>());
 		for (Entry<Long, Long> entry : times.entrySet()) {
-			if (entry.getKey() > end) {
-				// We've gone past the max limit specified by end
+			long s = entry.getKey(), e = entry.getValue() == -1 ? System.currentTimeMillis() : entry.getValue();
+
+			if (s > end) // We've gone past the max limit specified by end
 				break;
-			}
-			if (entry.getValue() < start && entry.getValue() != -1)
+			if (e < start)
 				continue;
-			result += (entry.getValue() == -1 ? System.currentTimeMillis() : entry.getValue()) - entry.getKey();
+
+			if (s < start)
+				s = start;
+			if (e > end)
+				e = end;
+
+			result += e - s;
 		}
 		return result;
 	}
