@@ -39,5 +39,7 @@ public abstract class Tracker extends TimerTask {
 	public SourceServer getConnection() {
 		return connection;
 	}
+	
+	public abstract void save();
 
 }

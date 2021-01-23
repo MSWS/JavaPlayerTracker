@@ -69,13 +69,7 @@ public class PlayerTrackerModule extends Module {
 
 	@Override
 	public void unload() {
-		save();
 		players = new HashMap<String, ServerPlayer>();
-	}
-
-	public void save() {
-		Iterator<ServerPlayer> it = players.values().iterator();
-		it.forEachRemaining(ServerPlayer::saveData);
 	}
 
 	public void update(ServerData server, SourceServer data) {

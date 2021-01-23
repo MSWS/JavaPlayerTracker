@@ -11,11 +11,13 @@ import com.github.koraktor.steamcondenser.exceptions.SteamCondenserException;
 
 import xyz.msws.tracker.Client;
 import xyz.msws.tracker.data.ServerData;
+import xyz.msws.tracker.data.ServerPlayer;
 import xyz.msws.tracker.module.PlayerTrackerModule;
 
 public class CSGOTracker extends Tracker {
 
 	private PlayerTrackerModule tracker;
+	private Set<ServerPlayer> toSave = new HashSet<>();
 
 	public CSGOTracker(Client client, ServerData server) {
 		super(client, server);
@@ -44,17 +46,21 @@ public class CSGOTracker extends Tracker {
 			Iterator<String> it = unparsed.iterator();
 			while (it.hasNext()) {
 				String s = it.next();
+				ServerPlayer sp = tracker.getPlayer(s);
+				toSave.add(sp);
 				if (oldPlayers.contains(s)) {
 					oldPlayers.remove(s);
 					continue;
 				}
 				if (s.isEmpty() || s == null)
 					continue;
-				tracker.getPlayer(s).logOn(server);
+				sp.logOn(server);
 			}
 
 			oldPlayers.forEach(s -> {
-				tracker.getPlayer(s).logOff(server);
+				ServerPlayer sp = tracker.getPlayer(s);
+				toSave.add(sp);
+				sp.logOn(server);
 			});
 			oldPlayers = connection.getPlayers().keySet();
 
@@ -64,5 +70,11 @@ public class CSGOTracker extends Tracker {
 		}
 
 		tracker.update(server, connection);
+	}
+
+	@Override
+	public void save() {
+		toSave.forEach(ServerPlayer::saveData);
+		toSave.clear();
 	}
 }

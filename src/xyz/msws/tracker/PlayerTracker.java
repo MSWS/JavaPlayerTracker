@@ -78,6 +78,7 @@ public class PlayerTracker extends Client {
 		Timer timer = new Timer();
 
 		List<ServerData> data = new ArrayList<>();
+		List<Tracker> trackers = new ArrayList<>();
 		data.addAll(config.getServers().keySet());
 
 		modules.add(new PlayerTrackerModule(this, data));
@@ -85,14 +86,15 @@ public class PlayerTracker extends Client {
 		for (ServerData d : data) {
 			Tracker t = new CSGOTracker(this, d);
 			timer.schedule(t, 0, 1000 * 20);
+			trackers.add(t);
 		}
 
 		// Save player data
 		timer.schedule(new TimerTask() {
 			@Override
 			public void run() {
-				getModule(PlayerTrackerModule.class).save();
 				data.forEach(ServerData::saveData);
+				trackers.forEach(Tracker::save);
 			}
 		}, 10 * 1000, 1000 * 60 * 5);
 	}
