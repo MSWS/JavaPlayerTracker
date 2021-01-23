@@ -40,6 +40,7 @@ public class ServerPlayer {
 		file = new File(PlayerTracker.PLAYER_FILE, name + ".txt");
 		if (!file.getParentFile().exists())
 			file.getParentFile().mkdirs();
+		load();
 	}
 
 	public ServerPlayer(File file) {
@@ -48,6 +49,9 @@ public class ServerPlayer {
 	}
 
 	private boolean load() {
+		if (!times.isEmpty()) {
+			Logger.log("[WARNING] Attempted to load while data was already loaded");
+		}
 		if (!file.exists())
 			return false;
 		FileReader fread;
@@ -143,6 +147,9 @@ public class ServerPlayer {
 		LinkedHashMap<Long, Long> times = this.times.getOrDefault(server.getName(), new LinkedHashMap<Long, Long>());
 		times.put(System.currentTimeMillis(), -1L);
 		this.times.put(server.getName(), times);
+		for (Entry<Long, Long> v : this.times.get(server.getName()).entrySet()) {
+			Logger.logf("%d: %d", v.getKey(), v.getValue());
+		}
 	}
 
 	/**
@@ -170,6 +177,11 @@ public class ServerPlayer {
 			Logger.logf("Error type: -1");
 			Logger.logf("Actual value: " + entry.getValue() + " key: " + entry.getKey() + " (time ago: "
 					+ (System.currentTimeMillis() - entry.getKey()) + ")");
+			Logger.logf("0 index: %d", sessions.get(0).getValue());
+			for (Entry<Long, Long> v : sessions) {
+				Logger.logf("%d: %d", v.getKey(), v.getValue());
+			}
+			sessions.forEach((k) -> Logger.logf("> %d: %d", k.getKey(), k.getValue()));
 			return;
 		}
 

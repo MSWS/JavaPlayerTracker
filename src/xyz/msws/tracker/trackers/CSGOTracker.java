@@ -12,6 +12,7 @@ import com.github.koraktor.steamcondenser.exceptions.SteamCondenserException;
 import xyz.msws.tracker.Client;
 import xyz.msws.tracker.data.ServerData;
 import xyz.msws.tracker.module.PlayerTrackerModule;
+import xyz.msws.tracker.utils.Logger;
 
 public class CSGOTracker extends Tracker {
 
@@ -51,9 +52,13 @@ public class CSGOTracker extends Tracker {
 				if (s.isEmpty() || s == null)
 					continue;
 				tracker.getPlayer(s).logOn(server);
+				Logger.logf("%s logged on", s);
 			}
 
-			oldPlayers.forEach(s -> tracker.getPlayer(s).logOff(server));
+			oldPlayers.forEach(s -> {
+				tracker.getPlayer(s).logOff(server);
+				Logger.logf("%s logged off", s);
+			});
 			oldPlayers = connection.getPlayers().keySet();
 
 			server.addMap(connection.getServerInfo().get("mapName") + "");
