@@ -13,6 +13,7 @@ import com.github.koraktor.steamcondenser.steam.servers.SourceServer;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
 import xyz.msws.tracker.Client;
+import xyz.msws.tracker.Logger;
 import xyz.msws.tracker.PlayerTracker;
 import xyz.msws.tracker.data.ServerData;
 import xyz.msws.tracker.data.ServerPlayer;
@@ -40,14 +41,14 @@ public class PlayerTrackerModule extends Module {
 
 		servers.values().forEach(s -> timer.schedule(s, 0, 1000 * 30));
 
-		System.out.println("Loading all player files...");
+		Logger.logf("Loading all player files...");
 
 		for (File f : PlayerTracker.PLAYER_FILE.listFiles()) {
 			ServerPlayer sp = new ServerPlayer(f);
 			players.put(sp.getRawName(), sp);
 		}
 
-		System.out.printf("Loaded %d files\n", players.size());
+		Logger.logf("Loaded %d files", players.size());
 	}
 
 	private void purge(TextChannel channel) {

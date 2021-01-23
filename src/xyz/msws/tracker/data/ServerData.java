@@ -16,6 +16,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import xyz.msws.tracker.Logger;
 import xyz.msws.tracker.PlayerTracker;
 
 /**
@@ -89,7 +90,7 @@ public class ServerData {
 			reader.close();
 			JsonElement obj = JsonParser.parseString(data);
 			if (!obj.isJsonObject()) {
-				System.out.printf("Json data from file %s is invalid\n", file.getName());
+				Logger.logf("Json data from file %s is invalid", file.getName());
 				return false;
 			}
 
@@ -100,7 +101,7 @@ public class ServerData {
 
 			JsonElement mapData = dat.get("maps");
 			if (!mapData.isJsonObject()) {
-				System.out.printf("Unable to load mapdata from %s\n", file.getName());
+				Logger.logf("Unable to load mapdata from %s", file.getName());
 				return true;
 			}
 
@@ -108,13 +109,12 @@ public class ServerData {
 			for (Entry<String, JsonElement> entry : mapObj.entrySet()) {
 				Set<Long> times = new HashSet<>();
 				if (!entry.getValue().isJsonArray()) {
-					System.out.printf("Unable to load map timings for map %s from %s\n", entry.getKey(),
-							file.getName());
+					Logger.logf("Unable to load map timings for map %s from %s", entry.getKey(), file.getName());
 					continue;
 				}
 				for (JsonElement p : entry.getValue().getAsJsonArray()) {
 					if (!p.isJsonPrimitive()) {
-						System.out.printf("Timing report %s from map %s in file %s is malformed\n", p.toString(),
+						Logger.logf("Timing report %s from map %s in file %s is malformed", p.toString(),
 								entry.getKey(), file.getName());
 						continue;
 					}

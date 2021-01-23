@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
 import xyz.msws.tracker.Client;
+import xyz.msws.tracker.Logger;
 
 public class CommandListener {
 
@@ -74,7 +75,9 @@ public class CommandListener {
 		Timer timer = new Timer();
 
 		new Thread(() -> {
+			Logger.logf("%s sent command: %s, executing...", event.getAuthor().getName(), message.getContentRaw());
 			fCmd.execute(message, msg.contains(" ") ? msg.substring(msg.indexOf(" ") + 1).split(" ") : new String[0]);
+			Logger.log("Finished command execution");
 			timer.cancel();
 		}).start();
 

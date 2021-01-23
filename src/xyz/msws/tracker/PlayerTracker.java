@@ -93,7 +93,7 @@ public class PlayerTracker extends Client {
 
 	@Override
 	public String getPrefix() {
-		return ".";
+		return "?";
 	}
 
 }

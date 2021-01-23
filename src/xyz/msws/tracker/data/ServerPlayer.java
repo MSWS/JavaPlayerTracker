@@ -16,6 +16,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import xyz.msws.tracker.Logger;
 import xyz.msws.tracker.PlayerTracker;
 import xyz.msws.tracker.utils.MSG;
 
@@ -57,7 +58,7 @@ public class ServerPlayer {
 			reader.close();
 			JsonElement obj = JsonParser.parseString(data);
 			if (!obj.isJsonObject()) {
-				System.out.printf("Json data from file %s is invalid\n", file.getName());
+				Logger.logf("Json data from file %s is invalid", file.getName());
 				return false;
 			}
 
@@ -67,7 +68,7 @@ public class ServerPlayer {
 
 			JsonElement timeData = dat.get("time");
 			if (!timeData.isJsonObject()) {
-				System.out.printf("Player data %s is malformed from file %s\n", timeData.toString(), file.getName());
+				Logger.logf("Player data %s is malformed from file %s", timeData.toString(), file.getName());
 				return false;
 			}
 
@@ -76,7 +77,7 @@ public class ServerPlayer {
 			for (Entry<String, JsonElement> entry : timeObj.entrySet()) {
 				String server = entry.getKey();
 				if (!entry.getValue().isJsonObject()) {
-					System.out.printf("Skipping server data %s because it is malformed (%s)", server,
+					Logger.logf("Skipping server data %s because it is malformed (%s)", server,
 							entry.getValue().toString());
 					continue;
 				}
@@ -98,7 +99,7 @@ public class ServerPlayer {
 		JsonObject data = new JsonObject();
 		data.addProperty("name", rawName);
 		if (rawName == null)
-			System.out.printf("[WARNING] Saving %s's name as null\n", rawName);
+			Logger.logf("[WARNING] Saving %s's name as null", rawName);
 
 		JsonObject serverTimes = new JsonObject();
 		for (Entry<String, LinkedHashMap<Long, Long>> entry : times.entrySet()) {
@@ -138,10 +139,9 @@ public class ServerPlayer {
 	 */
 	public void logOff(ServerData server) {
 		if (this.times.get(server.getName()).isEmpty()) {
-			System.out.printf(
-					"[WARNING] Desynchronization of player tracking, attempted to logOff %s when not logged on\n",
+			Logger.logf("[WARNING] Desynchronization of player tracking, attempted to logOff %s when not logged on",
 					rawName);
-			System.out.println("Error type: empty");
+			Logger.logf("Error type: empty");
 			return;
 		}
 		List<Entry<Long, Long>> sessions = new ArrayList<>();
@@ -152,11 +152,10 @@ public class ServerPlayer {
 		Entry<Long, Long> entry = sessions.get(sessions.size() - 1);
 
 		if (entry.getValue() != -1) {
-			System.out.printf(
-					"[WARNING] Desynchronization of player tracking, attempted to logOff %s when not logged on\n",
+			Logger.logf("[WARNING] Desynchronization of player tracking, attempted to logOff %s when not logged on",
 					rawName);
-			System.out.println("Error type: -1");
-			System.out.println("Actual value: " + entry.getValue() + " key: " + entry.getKey() + " (time ago: "
+			Logger.logf("Error type: -1");
+			Logger.logf("Actual value: " + entry.getValue() + " key: " + entry.getKey() + " (time ago: "
 					+ (System.currentTimeMillis() - entry.getKey()) + ")");
 			return;
 		}

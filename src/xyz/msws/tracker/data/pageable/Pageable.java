@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import xyz.msws.tracker.Client;
+import xyz.msws.tracker.Logger;
 import xyz.msws.tracker.data.Callback;
 
 /**
@@ -105,7 +106,7 @@ public abstract class Pageable<T> extends ListenerAdapter implements List<T> {
 			event.retrieveMessage().queue(m -> m.delete().queue());
 			return;
 		default:
-			System.out.println("Unknown emoji: " + react.getEmoji());
+			Logger.logf("Unknown emoji: " + react.getEmoji());
 			return;
 		}
 		send(event.getChannel());
