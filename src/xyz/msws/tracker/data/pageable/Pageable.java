@@ -11,7 +11,7 @@ import net.dv8tion.jda.api.entities.MessageReaction.ReactionEmote;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.hooks.SubscribeEvent;
 import xyz.msws.tracker.Client;
 import xyz.msws.tracker.data.Callback;
 import xyz.msws.tracker.utils.Logger;
@@ -23,7 +23,7 @@ import xyz.msws.tracker.utils.Logger;
  *
  * @param <T>
  */
-public abstract class Pageable<T> extends ListenerAdapter implements List<T> {
+public abstract class Pageable<T> implements List<T> {
 	protected List<T> pages;
 	protected int page;
 	protected Client client;
@@ -55,7 +55,7 @@ public abstract class Pageable<T> extends ListenerAdapter implements List<T> {
 		send(channel, this.page);
 	}
 
-	@Override
+	@SubscribeEvent
 	public void onGuildMessageReactionAdd(GuildMessageReactionAddEvent event) {
 		ReactionEmote react = event.getReactionEmote();
 		if (event.getUserIdLong() == client.getJDA().getSelfUser().getIdLong())

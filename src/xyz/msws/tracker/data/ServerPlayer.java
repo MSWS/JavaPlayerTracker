@@ -238,7 +238,7 @@ public class ServerPlayer {
 				// We've gone past the max limit specified by end
 				break;
 			}
-			if (entry.getValue() < start)
+			if (entry.getValue() < start && entry.getValue() != -1)
 				continue;
 			result += (entry.getValue() == -1 ? System.currentTimeMillis() : entry.getValue()) - entry.getKey();
 		}
