@@ -5,14 +5,12 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.TimeoutException;
-
-import com.github.koraktor.steamcondenser.exceptions.SteamCondenserException;
 
 import xyz.msws.tracker.Client;
 import xyz.msws.tracker.data.ServerData;
 import xyz.msws.tracker.data.ServerPlayer;
 import xyz.msws.tracker.module.PlayerTrackerModule;
+import xyz.msws.tracker.utils.Logger;
 
 public class CSGOTracker extends Tracker {
 
@@ -30,6 +28,7 @@ public class CSGOTracker extends Tracker {
 					connection.updateServerInfo();
 				} catch (Exception e) {
 					e.printStackTrace();
+					Logger.log(e);
 				}
 			}
 		}, 10000, 1000 * 60 * 5);
@@ -65,8 +64,9 @@ public class CSGOTracker extends Tracker {
 			oldPlayers = connection.getPlayers().keySet();
 
 			server.addMap(connection.getServerInfo().get("mapName") + "");
-		} catch (SteamCondenserException | TimeoutException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
+			Logger.log(e);
 		}
 
 		tracker.update(server, connection);

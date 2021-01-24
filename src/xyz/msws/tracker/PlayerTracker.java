@@ -2,9 +2,12 @@ package xyz.msws.tracker;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
 
 import javax.security.auth.login.LoginException;
 
@@ -48,6 +51,13 @@ public class PlayerTracker extends Client {
 
 			events = new AnnotatedEventManager();
 			Logger.log("Setting up events...");
+			Enumeration<String> it = LogManager.getLogManager().getLoggerNames();
+
+			while (it.hasMoreElements()) {
+				String s = it.nextElement();
+				java.util.logging.Logger log = java.util.logging.Logger.getLogger(s);
+				log.setLevel(Level.SEVERE);
+			}
 			jda.setEventManager(events);
 			jda.addEventListener(commands);
 

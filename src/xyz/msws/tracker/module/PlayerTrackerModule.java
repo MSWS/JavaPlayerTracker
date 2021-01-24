@@ -53,6 +53,7 @@ public class PlayerTrackerModule extends Module {
 				PlayerTracker.PLAYER_FILE.getParentFile().createNewFile();
 			} catch (IOException e) {
 				e.printStackTrace();
+				Logger.log(e);
 			}
 		} else {
 			for (File f : PlayerTracker.PLAYER_FILE.listFiles()) {

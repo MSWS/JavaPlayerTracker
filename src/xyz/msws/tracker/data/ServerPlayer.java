@@ -100,7 +100,12 @@ public class ServerPlayer {
 				}
 				LinkedHashMap<Long, Long> timeMap = new LinkedHashMap<Long, Long>();
 
+				long last = 0;
 				for (Entry<String, JsonElement> e : entry.getValue().getAsJsonObject().entrySet()) {
+					long c = Long.parseLong(e.getKey());
+					if (c < last) {
+						Logger.logf("WARNING Loading data of %s and it is unordered", rawName);
+					}
 					timeMap.put(Long.parseLong(e.getKey()), e.getValue().getAsLong());
 				}
 
@@ -119,19 +124,23 @@ public class ServerPlayer {
 		data.addProperty("name", rawName);
 
 		JsonObject serverTimes = new JsonObject();
-		boolean online = false;
 		for (Entry<String, LinkedHashMap<Long, Long>> entry : times.entrySet()) {
 			JsonObject times = new JsonObject();
+			boolean online = false;
+			long last = 0;
 			for (Entry<Long, Long> e : entry.getValue().entrySet()) {
 				long end = e.getValue();
 				if (end == -1) {
 					if (online) {
-						Logger.log("WARNING More than 1 entry had a value of -1");
+						Logger.log("WARNING More than 1 entry had a value of -1 for player " + rawName);
 						Logger.logf("%d: %d", e.getKey(), e.getValue());
 					}
 					online = true;
 					end = System.currentTimeMillis();
 				}
+
+				if (e.getKey() < last)
+					Logger.logf("WARNING Player data of %s is unordered", rawName);
 
 				times.addProperty(e.getKey().toString(), end);
 			}
@@ -162,6 +171,15 @@ public class ServerPlayer {
 			List<Entry<Long, Long>> sessions = new ArrayList<>();
 
 			times.entrySet().forEach(e -> sessions.add(e));
+//			sessions.sort(new Comparator<Entry<Long, Long>>() {
+//				@Override
+//				public int compare(Entry<Long, Long> o1, Entry<Long, Long> o2) {
+//					return o1.getKey() == o2.getKey() ? 0 : o1.getKey() > o2.getKey() ? -1 : 1;
+//				}
+//			});
+			times.clear();
+			for (Entry<Long, Long> entry : sessions)
+				times.put(entry.getKey(), entry.getValue());
 
 			Entry<Long, Long> entry = sessions.get(sessions.size() - 1);
 
