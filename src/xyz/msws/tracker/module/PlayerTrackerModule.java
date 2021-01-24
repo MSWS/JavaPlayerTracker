@@ -96,8 +96,9 @@ public class PlayerTrackerModule extends Module {
 	public void deleteAllData() {
 		Logger.log("Deleting all player data...");
 		players = new HashMap<>();
-		if (PlayerTracker.PLAYER_FILE.listFiles() == null)
-			return;
+		if (PlayerTracker.PLAYER_FILE.listFiles() != null)
+			for (File f : PlayerTracker.PLAYER_FILE.listFiles())
+				f.delete();
 		PlayerTracker.PLAYER_FILE.delete();
 	}
 

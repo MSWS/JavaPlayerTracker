@@ -103,7 +103,7 @@ public class DeletePlayerCommand extends AbstractCommand {
 		Pageable<?> pager = new PageableText(client,
 				player.equalsIgnoreCase("all") ? "Do you really want to delete **ALL** player data?"
 						: "Are you sure you want to delete **" + player + "**'s data?").bindTo(message.getAuthor());
-		pager.addCallback("✅ ", confirm(player));
+		pager.addCallback("✅", confirm(player));
 		pager.addCallback("❌", cancel());
 		pager.send(message.getTextChannel());
 	}
@@ -114,6 +114,8 @@ public class DeletePlayerCommand extends AbstractCommand {
 			public void execute(GuildMessageReactionAddEvent call) {
 				if (player.equalsIgnoreCase("all")) {
 					tracker.deleteAllData();
+					call.getChannel().sendMessage("Successfully deleted all player data.");
+					call.retrieveMessage().queue(m -> m.delete());
 					return;
 				}
 				tracker.getPlayer(player).delete();
