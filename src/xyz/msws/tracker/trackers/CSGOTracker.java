@@ -28,11 +28,11 @@ public class CSGOTracker extends Tracker {
 			public void run() {
 				try {
 					connection.updateServerInfo();
-				} catch (SteamCondenserException | TimeoutException e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
-		}, 1000, 1000 * 60 * 5);
+		}, 10000, 1000 * 60 * 5);
 	}
 
 	private Set<String> oldPlayers = new HashSet<>();

@@ -1,5 +1,7 @@
 package xyz.msws.tracker.commands;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
@@ -76,7 +78,17 @@ public class CommandListener {
 
 		new Thread(() -> {
 			Logger.logf("%s sent command: %s, executing...", event.getAuthor().getName(), message.getContentRaw());
-			fCmd.execute(message, msg.contains(" ") ? msg.substring(msg.indexOf(" ") + 1).split(" ") : new String[0]);
+			try {
+				fCmd.execute(message,
+						msg.contains(" ") ? msg.substring(msg.indexOf(" ") + 1).split(" ") : new String[0]);
+			} catch (Exception e) {
+				PrintWriter pw = new PrintWriter(new StringWriter());
+				e.printStackTrace(pw);
+				message.getChannel()
+						.sendMessage("An error occured while running that command:\n``` " + pw.toString() + "```")
+						.queue();
+				timer.cancel();
+			}
 			Logger.log("Finished command execution");
 			timer.cancel();
 		}).start();

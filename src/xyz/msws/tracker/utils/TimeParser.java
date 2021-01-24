@@ -55,6 +55,8 @@ public class TimeParser {
 	}
 
 	public static String getDurationDescription(long seconds, int precision) {
+		if (seconds == 0)
+			return "0 seconds";
 		for (int i = 0; i < TimeUnit.values().length - 1; i++) {
 			TimeUnit c = TimeUnit.values()[i], n = TimeUnit.values()[i + 1];
 			if (c.getSeconds() <= seconds && n.getSeconds() > seconds) {

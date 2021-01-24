@@ -1,6 +1,7 @@
 package xyz.msws.tracker.module;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -47,11 +48,19 @@ public class PlayerTrackerModule extends Module {
 
 		Logger.logf("Loading all player files...");
 
-		for (File f : PlayerTracker.PLAYER_FILE.listFiles()) {
-			ServerPlayer sp = new ServerPlayer(f);
-			if (sp.getRawName() == null)
-				continue;
-			players.put(sp.getRawName(), sp);
+		if (PlayerTracker.PLAYER_FILE == null) {
+			try {
+				PlayerTracker.PLAYER_FILE.getParentFile().createNewFile();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		} else {
+			for (File f : PlayerTracker.PLAYER_FILE.listFiles()) {
+				ServerPlayer sp = new ServerPlayer(f);
+				if (sp.getRawName() == null)
+					continue;
+				players.put(sp.getRawName(), sp);
+			}
 		}
 
 		Logger.logf("Loaded %d files", players.size());

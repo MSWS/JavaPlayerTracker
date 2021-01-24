@@ -119,9 +119,22 @@ public class ServerPlayer {
 		data.addProperty("name", rawName);
 
 		JsonObject serverTimes = new JsonObject();
+		boolean online = false;
 		for (Entry<String, LinkedHashMap<Long, Long>> entry : times.entrySet()) {
 			JsonObject times = new JsonObject();
+			for (Entry<Long, Long> e : entry.getValue().entrySet()) {
+				long end = e.getValue();
+				if (end == -1) {
+					if (online) {
+						Logger.log("WARNING More than 1 entry had a value of -1");
+						Logger.logf("%d: %d", e.getKey(), e.getValue());
+					}
+					online = true;
+					end = System.currentTimeMillis();
+				}
 
+				times.addProperty(e.getKey().toString(), end);
+			}
 			// Check if the value is -1, in which case save the current time
 
 			entry.getValue().entrySet().forEach(e -> times.addProperty(e.getKey().toString(),
@@ -145,6 +158,19 @@ public class ServerPlayer {
 	 */
 	public void logOn(ServerData server) {
 		LinkedHashMap<Long, Long> times = this.times.getOrDefault(server.getName(), new LinkedHashMap<Long, Long>());
+		if (!times.isEmpty()) {
+			List<Entry<Long, Long>> sessions = new ArrayList<>();
+
+			times.entrySet().forEach(e -> sessions.add(e));
+
+			Entry<Long, Long> entry = sessions.get(sessions.size() - 1);
+
+			if (entry.getValue() == -1) {
+				// Player is already logged on
+				return;
+			}
+		}
+
 		times.put(System.currentTimeMillis(), -1L);
 		this.times.put(server.getName(), times);
 	}
@@ -182,7 +208,7 @@ public class ServerPlayer {
 			return;
 		}
 
-		times.put(sessions.get(sessions.size() - 1).getKey(), System.currentTimeMillis());
+		times.put(entry.getKey(), System.currentTimeMillis());
 		this.times.put(server.getName(), times);
 	}
 
