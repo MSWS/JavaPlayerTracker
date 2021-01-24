@@ -117,6 +117,11 @@ public class ServerPlayer {
 		return true;
 	}
 
+	public void delete() {
+		file.delete();
+		times = new HashMap<>();
+	}
+
 	public void saveData() {
 		JsonObject data = new JsonObject();
 		if (rawName == null)

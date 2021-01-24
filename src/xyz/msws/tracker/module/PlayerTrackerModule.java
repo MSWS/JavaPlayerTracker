@@ -93,6 +93,14 @@ public class PlayerTrackerModule extends Module {
 		return result;
 	}
 
+	public void deleteAllData() {
+		Logger.log("Deleting all player data...");
+		players = new HashMap<>();
+		if (PlayerTracker.PLAYER_FILE.listFiles() == null)
+			return;
+		PlayerTracker.PLAYER_FILE.delete();
+	}
+
 	public Collection<ServerPlayer> getPlayers() {
 		return players.values();
 	}

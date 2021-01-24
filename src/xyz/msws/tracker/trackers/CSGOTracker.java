@@ -45,14 +45,15 @@ public class CSGOTracker extends Tracker {
 			Iterator<String> it = unparsed.iterator();
 			while (it.hasNext()) {
 				String s = it.next();
+				if (s.isEmpty() || s == null || s.trim().isEmpty())
+					continue;
 				ServerPlayer sp = tracker.getPlayer(s);
 				toSave.add(sp);
 				if (oldPlayers.contains(s)) {
 					oldPlayers.remove(s);
 					continue;
 				}
-				if (s.isEmpty() || s == null)
-					continue;
+
 				sp.logOn(server);
 			}
 
@@ -64,12 +65,11 @@ public class CSGOTracker extends Tracker {
 			oldPlayers = connection.getPlayers().keySet();
 
 			server.addMap(connection.getServerInfo().get("mapName") + "");
+			tracker.update(server, connection);
 		} catch (Exception e) {
 			e.printStackTrace();
 			Logger.log(e);
 		}
-
-		tracker.update(server, connection);
 	}
 
 	@Override

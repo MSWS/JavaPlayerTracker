@@ -1,8 +1,8 @@
 package xyz.msws.tracker.data.pageable;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -29,7 +29,7 @@ public abstract class Pageable<T> implements List<T> {
 	protected Client client;
 	protected User member;
 	protected long id;
-	protected Map<String, Callback<GuildMessageReactionAddEvent>> confirms = new HashMap<>();
+	protected Map<String, Callback<GuildMessageReactionAddEvent>> confirms = new LinkedHashMap<>();
 
 	public Pageable(Client client) {
 		this.client = client;

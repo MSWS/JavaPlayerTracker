@@ -30,6 +30,7 @@ public class ServerStatus extends TimerTask {
 	private Map<String, Object> map = new HashMap<>();
 	private Client client;
 	private int ping = 0;
+	private long lastUpdated;
 
 	public ServerStatus(Client client, ServerData data) {
 		this.client = client;
@@ -72,14 +73,15 @@ public class ServerStatus extends TimerTask {
 		embed.addField("Players", players.size() + "/" + map.get("maxPlayers"), true);
 		embed.addField("Map", map.get("mapName") + "", true);
 		embed.addField("Ping", ping + "", true);
-		embed.setFooter(recents + "\nLast Updated: " + TimeParser.getDateDescription(System.currentTimeMillis()));
+		embed.setFooter(recents + "\nLast Updated: " + TimeParser.getDateDescription(lastUpdated));
 
 		if (map.containsKey("maxPlayers")) {
-			int max = Integer.parseInt(map.get("maxPlayers") + "");
+			int max = Integer.parseInt(map.getOrDefault("maxPlayers", "-1") + "");
 			float percent = (float) players.size() / (float) max;
 			int r = (int) (percent * 255);
 			int g = (int) ((Math.cos((map.get("mapName") + "").length()) + 1) * 255);
 			int b = (int) (Math.sin(ping) + 1 * 255);
+			r = Math.min(Math.max(g, 0), 255);
 			g = Math.min(Math.max(g, 0), 255);
 			b = Math.min(Math.max(g, 0), 255);
 			embed.setColor(new Color(r, g, b));
@@ -109,6 +111,7 @@ public class ServerStatus extends TimerTask {
 			this.players = new HashSet<>(server.getPlayers().keySet());
 			this.ping = server.getPing();
 			map = server.getServerInfo();
+			lastUpdated = System.currentTimeMillis();
 		} catch (SteamCondenserException | TimeoutException e) {
 			e.printStackTrace();
 		}

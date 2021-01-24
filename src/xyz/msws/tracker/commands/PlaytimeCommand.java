@@ -25,6 +25,8 @@ public class PlaytimeCommand extends AbstractCommand {
 		super(client, name);
 		this.tracker = client.getModule(PlayerTrackerModule.class);
 		setAliases("pt");
+		setDescription("Views playtime leaderboard");
+		setUsage("<server> <from> <to>");
 	}
 
 	@Override

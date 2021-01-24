@@ -56,15 +56,21 @@ public class PageableText extends Pageable<Message> {
 			for (String s : confirms.keySet())
 				m.addReaction(s).queue();
 
-			m.addReaction("⏪").queue();
-			m.addReaction("⬅").queue();
-			m.addReaction("◀").queue();
+			if (pages.size() > 3)
+				m.addReaction("⏪").queue();
+			if (pages.size() > 2)
+				m.addReaction("⬅").queue();
+			if (pages.size() > 1)
+				m.addReaction("◀").queue();
 
 			m.addReaction("❌").queue();
 
-			m.addReaction("▶").queue();
-			m.addReaction("➡").queue();
-			m.addReaction("⏩").queue();
+			if (pages.size() > 1)
+				m.addReaction("▶").queue();
+			if (pages.size() > 2)
+				m.addReaction("➡").queue();
+			if (pages.size() > 3)
+				m.addReaction("⏩").queue();
 		});
 	}
 

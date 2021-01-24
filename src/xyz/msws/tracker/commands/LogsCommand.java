@@ -1,8 +1,6 @@
 package xyz.msws.tracker.commands;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -24,46 +22,41 @@ public class LogsCommand extends AbstractCommand {
 
 	public LogsCommand(Client client, String name) {
 		super(client, name);
+		setAliases("viewlogs");
+		setDescription("Views bot logs");
+		setUsage("");
 	}
 
 	@Override
 	public void execute(Message message, String[] args) {
-		File file = new File("output.log");
 		List<String> out = new ArrayList<>();
 		if (Logger.getLogs().isEmpty()) {
 			message.getChannel().sendMessage("No logs are available").queue();
 			return;
 		}
+
 		for (int i = Math.max(Logger.getLogs().size() - 10, 0); i < Logger.getLogs().size(); i++)
 			out.add(Logger.getLogs().get(i));
-		try (FileWriter writer = new FileWriter(file)) {
-			writer.write(String.join("\n", Logger.getLogs()));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 
-		try {
-			message.getChannel().sendMessage("```\n" + String.join("\n", out) + "```").queue();
-			message.getChannel().sendFile(file, file.getName()).queue();
-		} catch (IllegalArgumentException e) {
-			message.getChannel().sendMessage("Logs are too big, uploading...").queue();
+		message.getChannel().sendMessage("```\n" + String.join("\n", out) + "```").queue();
+		message.getChannel().sendMessage("Logs are too big, uploading...").queue();
 
-			Callback<String> result = new Callback<String>() {
+		Callback<String> result = new Callback<String>() {
 
-				@Override
-				public void execute(String call) {
-					String response = "";
-					if (!call.startsWith("http")) {
-						response = "Unable to upload logs to pastebin, reason:\n`" + call + "`";
-					} else {
-						response = "Logs can be found at " + call;
-					}
-					message.getChannel().sendMessage(response).queue();
+			@Override
+			public void execute(String call) {
+				String response = "";
+				if (!call.startsWith("http")) {
+					response = "Unable to upload logs to pastebin, reason:\n`" + call + "`";
+				} else {
+					response = "Logs can be found at " + call;
 				}
-			};
-			pasteUpload("PlayerTracker Logs (Requested by " + message.getAuthor().getAsTag() + ")",
-					String.join("\n", Logger.getLogs()), result);
-		}
+				message.getChannel().sendMessage(response).queue();
+			}
+		};
+		pasteUpload("PlayerTracker Logs (Requested by " + message.getAuthor().getAsTag() + ")",
+				String.join("\n", Logger.getLogs()), result);
+
 	}
 
 	private void pasteUpload(String title, String content, Callback<String> call) {

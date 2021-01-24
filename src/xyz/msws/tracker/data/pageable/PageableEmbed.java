@@ -44,6 +44,7 @@ public class PageableEmbed extends Pageable<MessageEmbed> {
 	}
 
 	public void send(TextChannel channel, int page) {
+
 		if (id != 0) {
 			channel.editMessageById(id, pages.get(page)).queue();
 			return;
@@ -55,15 +56,21 @@ public class PageableEmbed extends Pageable<MessageEmbed> {
 			for (String s : confirms.keySet())
 				m.addReaction(s).queue();
 
-			m.addReaction("⏪").queue();
-			m.addReaction("⬅").queue();
-			m.addReaction("◀").queue();
+			if (pages.size() > 3)
+				m.addReaction("⏪").queue();
+			if (pages.size() > 2)
+				m.addReaction("⬅").queue();
+			if (pages.size() > 1)
+				m.addReaction("◀").queue();
 
 			m.addReaction("❌").queue();
 
-			m.addReaction("▶").queue();
-			m.addReaction("➡").queue();
-			m.addReaction("⏩").queue();
+			if (pages.size() > 1)
+				m.addReaction("▶").queue();
+			if (pages.size() > 2)
+				m.addReaction("➡").queue();
+			if (pages.size() > 3)
+				m.addReaction("⏩").queue();
 		});
 	}
 
