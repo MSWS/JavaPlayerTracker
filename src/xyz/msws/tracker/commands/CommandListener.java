@@ -82,10 +82,11 @@ public class CommandListener {
 				fCmd.execute(message,
 						msg.contains(" ") ? msg.substring(msg.indexOf(" ") + 1).split(" ") : new String[0]);
 			} catch (Exception e) {
-				PrintWriter pw = new PrintWriter(new StringWriter());
+				StringWriter sw = new StringWriter();
+				PrintWriter pw = new PrintWriter(sw);
 				e.printStackTrace(pw);
 				message.getChannel()
-						.sendMessage("An error occured while running that command:\n``` " + pw.toString() + "```")
+						.sendMessage("An error occured while running that command:\n``` " + sw.toString() + "```")
 						.queue();
 				timer.cancel();
 			}

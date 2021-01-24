@@ -20,7 +20,7 @@ public class LogsCommand extends AbstractCommand {
 	public void execute(Message message, String[] args) {
 		File file = new File("output.log");
 		List<String> out = new ArrayList<>();
-		for (int i = 0; i < Logger.getLogs().size(); i++)
+		for (int i = Logger.getLogs().size() - 1; i >= 0; i--)
 			out.add(Logger.getLogs().get(i));
 		try (FileWriter writer = new FileWriter(file)) {
 			writer.write(String.join("\n", Logger.getLogs()));
