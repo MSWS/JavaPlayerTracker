@@ -48,7 +48,7 @@ public class PlayerTrackerModule extends Module {
 
 		Logger.logf("Loading all player files...");
 
-		if (PlayerTracker.PLAYER_FILE == null) {
+		if (PlayerTracker.PLAYER_FILE.listFiles() == null) {
 			try {
 				PlayerTracker.PLAYER_FILE.getParentFile().createNewFile();
 			} catch (IOException e) {

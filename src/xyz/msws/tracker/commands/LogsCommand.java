@@ -3,6 +3,8 @@ package xyz.msws.tracker.commands;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import net.dv8tion.jda.api.entities.Message;
 import xyz.msws.tracker.Client;
@@ -17,6 +19,9 @@ public class LogsCommand extends AbstractCommand {
 	@Override
 	public void execute(Message message, String[] args) {
 		File file = new File("output.log");
+		List<String> out = new ArrayList<>();
+		for (int i = 0; i < Logger.getLogs().size(); i++)
+			out.add(Logger.getLogs().get(i));
 		try (FileWriter writer = new FileWriter(file)) {
 			writer.write(String.join("\n", Logger.getLogs()));
 		} catch (IOException e) {
@@ -24,6 +29,7 @@ public class LogsCommand extends AbstractCommand {
 		}
 
 		try {
+			message.getChannel().sendMessage("```\n" + String.join("\n", out) + "```").queue();
 			message.getChannel().sendFile(file, file.getName()).queue();
 		} catch (IllegalArgumentException e) {
 			message.getChannel().sendMessage("Logs are too big...").queue();

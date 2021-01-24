@@ -192,6 +192,18 @@ public class ServerPlayer {
 
 		times.entrySet().forEach(e -> sessions.add(e));
 
+		boolean online = false;
+		for (Entry<Long, Long> entry : sessions) {
+			if (entry.getValue() == -1) {
+				if (online) {
+					Logger.log("[WARNING] Attempted to log off a player that should have already been logged off");
+					Logger.logf("%d: %d", entry.getKey(), entry.getValue());
+					entry.setValue(System.currentTimeMillis());
+				}
+				online = true;
+			}
+		}
+
 		Entry<Long, Long> entry = sessions.get(sessions.size() - 1);
 
 		if (entry.getValue() != -1) {
