@@ -29,13 +29,19 @@ public class PlayerTrackerModule extends Module {
 	public PlayerTrackerModule(Client client, List<ServerData> servers) {
 		super(client);
 		servers.forEach(s -> this.servers.put(s, new ServerStatus(client, s)));
+
+		timer = new Timer();
 	}
 
 	private Timer timer;
 
+	public void addServer(ServerData server) {
+		this.servers.put(server, new ServerStatus(client, server));
+		timer.schedule(servers.get(server), 0, 1000 * 30);
+	}
+
 	@Override
 	public void load() {
-		timer = new Timer();
 
 		for (ServerData d : servers.keySet()) {
 			String chan = (client instanceof PlayerTracker) ? ((PlayerTracker) client).getConfig().getChannel(d)
@@ -100,6 +106,34 @@ public class PlayerTrackerModule extends Module {
 			for (File f : PlayerTracker.PLAYER_FILE.listFiles())
 				f.delete();
 		PlayerTracker.PLAYER_FILE.delete();
+	}
+
+	public void deletePlayer(String player) {
+		players.remove(player);
+	}
+
+	public boolean deleteServer(String server) {
+		ServerData remove = null;
+		for (ServerData dat : servers.keySet()) {
+			if (dat.getName().equals(server)) {
+				remove = dat;
+				break;
+			}
+		}
+		if (remove == null) {
+			return false;
+		}
+		servers.remove(remove);
+		return true;
+	}
+
+	public ServerData getServer(String server) {
+		for (ServerData dat : servers.keySet()) {
+			if (dat.getName().equals(server)) {
+				return dat;
+			}
+		}
+		return null;
 	}
 
 	public Collection<ServerPlayer> getPlayers() {

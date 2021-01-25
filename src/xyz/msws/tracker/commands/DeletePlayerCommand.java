@@ -60,6 +60,15 @@ public class DeletePlayerCommand extends AbstractCommand {
 			message.getChannel().sendMessage("No players matched your search").queue();
 			return;
 		}
+		Comparator<String> cmp = new Comparator<String>() {
+			@Override
+			public int compare(String o1, String o2) {
+				int s1 = MSG.simplify(o1.replace(" ", "")).compareTo(simp);
+				int s2 = MSG.simplify(o2.replace(" ", "")).compareTo(simp);
+				return s1 == s2 ? 0 : s1 > s2 ? -1 : 1;
+			}
+		};
+		results.sort(cmp);
 
 		List<String> messages = new ArrayList<>();
 
@@ -76,13 +85,6 @@ public class DeletePlayerCommand extends AbstractCommand {
 		if (builder.length() != 0)
 			messages.add(builder.toString());
 
-		messages.sort(new Comparator<String>() {
-			@Override
-			public int compare(String o1, String o2) {
-				return o1.compareTo(o2);
-			}
-		});
-
 		String[] nums = new String[] { "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣" };
 
 		Pageable<?> pager = new PageableText(client, messages).bindTo(message.getAuthor());
@@ -92,7 +94,7 @@ public class DeletePlayerCommand extends AbstractCommand {
 			pager.addCallback(nums[i], new Callback<GuildMessageReactionAddEvent>() {
 				@Override
 				public void execute(GuildMessageReactionAddEvent call) {
-					delete(results.get(fi + pager.getPage() * size), message);
+					delete(results.get(fi + (pager.getPage() * size)), message);
 				}
 			});
 		}
@@ -114,12 +116,13 @@ public class DeletePlayerCommand extends AbstractCommand {
 			public void execute(GuildMessageReactionAddEvent call) {
 				if (player.equalsIgnoreCase("all")) {
 					tracker.deleteAllData();
-					call.getChannel().sendMessage("Successfully deleted all player data.");
+					call.getChannel().sendMessage("Successfully deleted all player data.").queue();
 					call.retrieveMessage().queue(m -> m.delete());
 					return;
 				}
 				tracker.getPlayer(player).delete();
-				call.getChannel().sendMessage("Successfully deleted " + player + "'s data.");
+				tracker.deletePlayer(player);
+				call.getChannel().sendMessage("Successfully deleted " + player + "'s data.").queue();
 				call.retrieveMessage().queue(m -> m.delete());
 			}
 		};

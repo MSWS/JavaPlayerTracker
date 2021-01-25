@@ -16,7 +16,9 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.hooks.AnnotatedEventManager;
 import net.dv8tion.jda.api.hooks.IEventManager;
 import net.dv8tion.jda.api.requests.restaction.MessageAction;
+import xyz.msws.tracker.commands.AddServerCommand;
 import xyz.msws.tracker.commands.DeletePlayerCommand;
+import xyz.msws.tracker.commands.DeleteServerCommand;
 import xyz.msws.tracker.commands.HelpCommand;
 import xyz.msws.tracker.commands.LogsCommand;
 import xyz.msws.tracker.commands.PlaytimeCommand;
@@ -72,6 +74,8 @@ public class PlayerTracker extends Client {
 			commands.registerCommand(new StatisticsCommand(this, "statistics"));
 			commands.registerCommand(new HelpCommand(this, "help"));
 			commands.registerCommand(new DeletePlayerCommand(this, "deleteplayer"));
+			commands.registerCommand(new AddServerCommand(this, "addserver"));
+			commands.registerCommand(new DeleteServerCommand(this, "deleteserver"));
 			Logger.logf("Successfully registered %d command%s", commands.getCommands().size(),
 					commands.getCommands().size() == 1 ? "" : "s");
 

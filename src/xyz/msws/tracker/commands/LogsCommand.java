@@ -39,7 +39,7 @@ public class LogsCommand extends AbstractCommand {
 			out.add(Logger.getLogs().get(i));
 
 		message.getChannel().sendMessage("```\n" + String.join("\n", out) + "```").queue();
-		message.getChannel().sendMessage("Logs are too big, uploading...").queue();
+		message.getChannel().sendMessage("Uploading logs...").queue();
 
 		Callback<String> result = new Callback<String>() {
 
@@ -60,51 +60,48 @@ public class LogsCommand extends AbstractCommand {
 	}
 
 	private void pasteUpload(String title, String content, Callback<String> call) {
-		Runnable run = new Runnable() {
-			@Override
-			public void run() {
-				try {
-					URL url = new URL("https://pastebin.com/api/api_post.php");
+		new Thread(() -> {
+			try {
+				URL url = new URL("https://pastebin.com/api/api_post.php");
 
-					HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
-					con.setDoOutput(true);
-					con.setRequestMethod("POST");
-					con.setRequestProperty("User-Agent", "Java Application");
+				HttpsURLConnection con = (HttpsURLConnection) url.openConnection();
+				con.setDoOutput(true);
+				con.setRequestMethod("POST");
+				con.setRequestProperty("User-Agent",
+						"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:84.0) Gecko/20100101 Firefox/84.0");
 
-					Map<String, Object> params = new LinkedHashMap<>();
+				Map<String, Object> params = new LinkedHashMap<>();
 
-					params.put("api_dev_key", "sOlnSraxHHjC9MuvXvkL2lCScGkzKGjF");
-					params.put("api_option", "paste");
-					params.put("api_paste_code", content);
-					params.put("api_paste_name", title);
-					params.put("api_paste_expire_date", "1W");
+				params.put("api_dev_key", "sOlnSraxHHjC9MuvXvkL2lCScGkzKGjF");
+				params.put("api_option", "paste");
+				params.put("api_paste_code", content);
+				params.put("api_paste_name", title);
+				params.put("api_paste_expire_date", "1W");
 
-					StringBuilder postData = new StringBuilder();
-					for (Map.Entry<String, Object> param : params.entrySet()) {
-						if (postData.length() != 0)
-							postData.append('&');
-						postData.append(URLEncoder.encode(param.getKey(), "UTF-8"));
-						postData.append('=');
-						postData.append(URLEncoder.encode(String.valueOf(param.getValue()), "UTF-8"));
-					}
-					byte[] postDataBytes = postData.toString().getBytes("UTF-8");
-
-					con.getOutputStream().write(postDataBytes);
-					if (con.getResponseCode() != 200)
-						call.execute(con.getResponseMessage());
-					Reader in = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
-
-					String result = "";
-					for (int c; (c = in.read()) >= 0;)
-						result += (char) c;
-					call.execute(result);
-				} catch (IOException e) {
-					e.printStackTrace();
+				StringBuilder postData = new StringBuilder();
+				for (Map.Entry<String, Object> param : params.entrySet()) {
+					if (postData.length() != 0)
+						postData.append('&');
+					postData.append(URLEncoder.encode(param.getKey(), "UTF-8"));
+					postData.append('=');
+					postData.append(URLEncoder.encode(String.valueOf(param.getValue()), "UTF-8"));
 				}
+				byte[] postDataBytes = postData.toString().getBytes("UTF-8");
+
+				con.getOutputStream().write(postDataBytes);
+				if (con.getResponseCode() != 200)
+					call.execute(con.getResponseCode() + ": " + con.getResponseMessage());
+				Reader in = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
+
+				String result = "";
+				for (int c; (c = in.read()) >= 0;)
+					result += (char) c;
+				call.execute(result);
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
-		};
-		Thread t = new Thread(run);
-		t.start();
+
+		}).run();
 	}
 
 }

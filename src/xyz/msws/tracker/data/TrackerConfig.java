@@ -89,6 +89,10 @@ public class TrackerConfig {
 		servers.put(data, channel);
 	}
 
+	public void removeServer(ServerData data) {
+		servers.remove(data);
+	}
+
 	public void clearServers() {
 		servers.clear();
 	}
