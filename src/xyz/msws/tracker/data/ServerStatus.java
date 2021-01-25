@@ -81,9 +81,9 @@ public class ServerStatus extends TimerTask {
 			int r = (int) (percent * 255);
 			int g = (int) ((Math.cos((map.get("mapName") + "").length()) + 1) * 255);
 			int b = (int) (Math.sin(ping) + 1 * 255);
-			r = Math.min(Math.max(g, 0), 255);
+			r = Math.min(Math.max(r, 0), 255);
 			g = Math.min(Math.max(g, 0), 255);
-			b = Math.min(Math.max(g, 0), 255);
+			b = Math.min(Math.max(b, 0), 255);
 			embed.setColor(new Color(r, g, b));
 		}
 

@@ -62,7 +62,7 @@ public class CSGOTracker extends Tracker {
 				toSave.add(sp);
 				sp.logOn(server);
 			});
-			oldPlayers = connection.getPlayers().keySet();
+			oldPlayers = new HashSet<>(connection.getPlayers().keySet());
 
 			server.addMap(connection.getServerInfo().get("mapName") + "");
 			tracker.update(server, connection);

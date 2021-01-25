@@ -165,6 +165,10 @@ public class ServerPlayer {
 		}
 	}
 
+	public Map<String, LinkedHashMap<Long, Long>> getTimes() {
+		return times;
+	}
+
 	/**
 	 * Marks the player as having logged on to a server
 	 * 

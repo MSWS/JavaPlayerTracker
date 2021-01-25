@@ -4,7 +4,10 @@ import java.awt.Color;
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -12,6 +15,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import xyz.msws.tracker.Client;
 import xyz.msws.tracker.data.ServerData;
+import xyz.msws.tracker.data.ServerPlayer;
 import xyz.msws.tracker.module.PlayerTrackerModule;
 import xyz.msws.tracker.utils.TimeParser;
 
@@ -23,8 +27,8 @@ public class StatisticsCommand extends AbstractCommand {
 		super(client, name);
 		tracker = client.getModule(PlayerTrackerModule.class);
 		setAliases("stats");
-		setDescription("Views bot or server statistics");
-		setUsage("<server>");
+		setDescription("Views bot, player, or server statistics");
+		setUsage("<server/player>");
 	}
 
 	@Override
@@ -49,6 +53,7 @@ public class StatisticsCommand extends AbstractCommand {
 		}
 
 		String name = String.join("", args), serverName = null;
+
 		ServerData server;
 		for (String n : tracker.getServerNames()) {
 			if (n.equalsIgnoreCase(name)) {
@@ -67,10 +72,57 @@ public class StatisticsCommand extends AbstractCommand {
 		server = tracker.getServers().parallelStream().filter(s -> s.getName().equals(fs)).findFirst().orElse(null);
 
 		if (serverName == null || server == null) {
-			message.getChannel()
-					.sendMessage(
-							"Unknown server, available options: \n-" + String.join("\n- ", tracker.getServerNames()))
-					.queue();
+			ServerPlayer player = null;
+			for (ServerPlayer p : tracker.getPlayers())
+				if (p.getRawName().replace(" ", "").equalsIgnoreCase(name))
+					player = p;
+
+			if (player == null)
+				for (ServerPlayer p : tracker.getPlayers())
+					if (p.getRawName().replace(" ", "").toLowerCase().contains(name.toLowerCase()))
+						player = p;
+
+			if (player == null) {
+				message.getChannel().sendMessage(
+						"Unknown server, available options: \n-" + String.join("\n- ", tracker.getServerNames()))
+						.queue();
+				return;
+			}
+
+			builder.setTitle(player.getRawName() + " Statistics");
+			Map<String, Long> servers = new HashMap<>();
+
+			long last = 0;
+			for (String s : tracker.getServerNames()) {
+				servers.put(s, player.getPlaytimeSince(0, s));
+				List<Entry<Long, Long>> times = new ArrayList<>(
+						player.getTimes().getOrDefault(s, new LinkedHashMap<>()).entrySet());
+				if (times.isEmpty())
+					continue;
+				if (times.get(times.size() - 1).getValue() > last) {
+					last = times.get(times.size() - 1).getValue();
+					serverName = s;
+				}
+			}
+			List<Entry<String, Long>> sorted = new ArrayList<>(servers.entrySet());
+			sorted.sort(new Comparator<Entry<String, Long>>() {
+				@Override
+				public int compare(Entry<String, Long> o1, Entry<String, Long> o2) {
+					return o2.getValue().compareTo(o1.getValue());
+				}
+			});
+			builder.appendDescription("**Server Playtimes**\n");
+			for (Entry<String, Long> entry : sorted) {
+				builder.appendDescription(
+						entry.getKey() + ": " + TimeParser.getDurationDescription(entry.getValue() / 1000) + "\n");
+			}
+
+			builder.addField(
+					"Last Online", serverName + " "
+							+ TimeParser.getDurationDescription((System.currentTimeMillis() - last) / 1000) + " ago",
+					true);
+
+			message.getChannel().sendMessage(builder.build()).queue();
 			return;
 		}
 
@@ -87,7 +139,7 @@ public class StatisticsCommand extends AbstractCommand {
 		long players = tracker.getPlayers().parallelStream().filter(p -> p.getPlaytimeSince(0, fs) > 0).count();
 		builder.appendDescription("All Time: " + players + "\n");
 
-		builder.appendDescription("**Map Rankings**\n");
+		builder.appendDescription("\n**Map Rankings**\n");
 
 		List<Entry<String, Set<Long>>> rank = new ArrayList<>();
 		rank.addAll(server.getMaps().entrySet());

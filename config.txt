@@ -1,1 +1,1 @@
-{"servers":{"eGO JB":{"ip":"74.91.113.83:27015","channel":"ego-logs"},"eGO TTT":{"ip":"74.91.113.113:27015","channel":"ego-logs"},"DEFY-TTT":{"ip":"172.96.139.28:27015","channel":"defy-logs"},"DEFY-Surf":{"ip":"172.96.139.29:27015","channel":"defy-logs"}}}
+{"servers":{"DEFY-Surf":{"ip":"172.96.139.29","channel":"defy-logs"},"DEFY-TTT":{"ip":"172.96.139.28","channel":"defy-logs"},"eGO JB":{"ip":"74.91.113.83","channel":"ego-logs"},"eGO TTT":{"ip":"74.91.113.113","channel":"ego-logs"}}}

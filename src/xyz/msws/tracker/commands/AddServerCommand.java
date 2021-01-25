@@ -39,12 +39,12 @@ public class AddServerCommand extends AbstractCommand {
 		name = name.trim();
 		String channel = args[2];
 
-		if (message.getGuild().getTextChannelsByName(channel, true) == null) {
+		if (message.getGuild().getTextChannelsByName(channel, true).isEmpty()) {
 			message.getChannel().sendMessage("Unknown channel: " + channel).queue();
 			return;
 		}
-		
-		if(tracker.getServerNames().contains(name)) {
+
+		if (tracker.getServerNames().contains(name)) {
 			message.getChannel().sendMessage("That server name is already taken.").queue();
 			return;
 		}
