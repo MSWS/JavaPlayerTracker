@@ -99,8 +99,9 @@ public class StatisticsCommand extends AbstractCommand {
 						player.getTimes().getOrDefault(s, new LinkedHashMap<>()).entrySet());
 				if (times.isEmpty())
 					continue;
-				if (times.get(times.size() - 1).getValue() > last) {
-					last = times.get(times.size() - 1).getValue();
+				long t = times.get(times.size() - 1).getValue();
+				if (t > last || t == -1) {
+					last = t;
 					serverName = s;
 				}
 			}
@@ -117,10 +118,10 @@ public class StatisticsCommand extends AbstractCommand {
 						entry.getKey() + ": " + TimeParser.getDurationDescription(entry.getValue() / 1000) + "\n");
 			}
 
-			builder.addField(
-					"Last Online", serverName + " "
-							+ TimeParser.getDurationDescription((System.currentTimeMillis() - last) / 1000) + " ago",
-					true);
+			builder.addField("Last Online", serverName + " "
+					+ (last == -1 ? "Now"
+							: TimeParser.getDurationDescription((System.currentTimeMillis() - last) / 1000))
+					+ " ago", true);
 
 			message.getChannel().sendMessage(builder.build()).queue();
 			return;
