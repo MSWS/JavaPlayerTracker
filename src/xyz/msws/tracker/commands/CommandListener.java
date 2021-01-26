@@ -11,7 +11,6 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
 import xyz.msws.tracker.Client;
-import xyz.msws.tracker.utils.Logger;
 
 public class CommandListener {
 
@@ -71,16 +70,34 @@ public class CommandListener {
 		if (cmd == null)
 			return;
 
-		boolean running = true;
-
 		final AbstractCommand fCmd = cmd;
 		Timer timer = new Timer();
 
+		timer.schedule(new TimerTask() {
+			long start = System.currentTimeMillis();
+
+			@Override
+			public void run() {
+				if (System.currentTimeMillis() - start > 60 * 1000 * 3) {
+					Client.getLogger().warning(
+							message.getContentRaw() + " started a command that hasn't finished within 3 minutes.");
+					this.cancel();
+					return;
+				}
+				message.getTextChannel().sendTyping().queue();
+			}
+		}, 0, 8000);
+
 		new Thread(() -> {
-			Logger.logf("%s sent command: %s, executing...", event.getAuthor().getName(), message.getContentRaw());
+			long start = System.currentTimeMillis();
+			Client.getLogger().info(String.format("%s sent command: '%s', executing...", event.getAuthor().getName(),
+					message.getContentRaw()));
 			try {
 				fCmd.execute(message,
 						msg.contains(" ") ? msg.substring(msg.indexOf(" ") + 1).split(" ") : new String[0]);
+
+				Client.getLogger()
+						.info("Successfully finished execution, took " + (System.currentTimeMillis() - start) + "ms");
 			} catch (Exception e) {
 				StringWriter sw = new StringWriter();
 				PrintWriter pw = new PrintWriter(sw);
@@ -89,22 +106,10 @@ public class CommandListener {
 						.sendMessage("An error occured while running that command:\n``` " + sw.toString() + "```")
 						.queue();
 				timer.cancel();
+				Client.getLogger().info("An error occured while executing command:\n``` " + sw.toString() + "```");
 			}
-			Logger.log("Finished command execution");
 			timer.cancel();
 		}).start();
-
-		timer.schedule(new TimerTask() {
-
-			@Override
-			public void run() {
-				if (!running) {
-					this.cancel();
-					return;
-				}
-				message.getTextChannel().sendTyping().queue();
-			}
-		}, 0, 8000);
 
 	}
 }

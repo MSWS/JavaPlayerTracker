@@ -6,6 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
+@Deprecated
 public class Logger {
 	private static List<String> logs = new ArrayList<>();
 	String pattern;

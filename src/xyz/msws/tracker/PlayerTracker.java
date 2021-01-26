@@ -1,13 +1,14 @@
 package xyz.msws.tracker;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.logging.Level;
-import java.util.logging.LogManager;
+import java.util.logging.Handler;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
 import javax.security.auth.login.LoginException;
 
@@ -28,7 +29,6 @@ import xyz.msws.tracker.data.TrackerConfig;
 import xyz.msws.tracker.module.PlayerTrackerModule;
 import xyz.msws.tracker.trackers.CSGOTracker;
 import xyz.msws.tracker.trackers.Tracker;
-import xyz.msws.tracker.utils.Logger;
 
 /**
  * Tracks players on source servers
@@ -45,6 +45,24 @@ public class PlayerTracker extends Client {
 	public PlayerTracker(String token) {
 		super(token);
 		this.config = new TrackerConfig(new File("config.txt"));
+		logger = Logger.getLogger(PlayerTracker.class.getName());
+		SimpleDateFormat format = new SimpleDateFormat("MM/dd/yy h:m:s.S");
+
+		logger.addHandler(new Handler() {
+			@Override
+			public void publish(LogRecord record) {
+				logs.add(format.format(System.currentTimeMillis()) + " " + record.getLevel().toString() + " "
+						+ record.getMessage());
+			}
+
+			@Override
+			public void flush() {
+			}
+
+			@Override
+			public void close() throws SecurityException {
+			}
+		});
 	}
 
 	@Override
@@ -53,22 +71,15 @@ public class PlayerTracker extends Client {
 			this.jda = JDABuilder.createDefault(token).build();
 
 			events = new AnnotatedEventManager();
-			Logger.log("Setting up events...");
-			Enumeration<String> it = LogManager.getLogManager().getLoggerNames();
-
-			while (it.hasMoreElements()) {
-				String s = it.nextElement();
-				java.util.logging.Logger log = java.util.logging.Logger.getLogger(s);
-				log.setLevel(Level.SEVERE);
-			}
+			logger.info("Setting up events...");
 			jda.setEventManager(events);
 			jda.addEventListener(commands);
 
-			Logger.log("Starting timers...");
+			logger.info("Starting timers...");
 			startTimers();
 			jda.awaitReady();
 
-			Logger.log("Registering commands");
+			logger.info("Registering commands...");
 			commands.registerCommand(new PlaytimeCommand(this, "playtime"));
 			commands.registerCommand(new LogsCommand(this, "logs"));
 			commands.registerCommand(new StatisticsCommand(this, "statistics"));
@@ -76,10 +87,8 @@ public class PlayerTracker extends Client {
 			commands.registerCommand(new DeletePlayerCommand(this, "deleteplayer"));
 			commands.registerCommand(new AddServerCommand(this, "addserver"));
 			commands.registerCommand(new DeleteServerCommand(this, "deleteserver"));
-			Logger.logf("Successfully registered %d command%s", commands.getCommands().size(),
-					commands.getCommands().size() == 1 ? "" : "s");
-
-			Logger.log("Loading modules...");
+			logger.info("Successfully registered " + commands.getCommands().size() + " commands");
+			logger.info("Loading modules...");
 			loadModules();
 
 			jda.getPresence().setActivity(Activity.watching("CS:GO Servers"));

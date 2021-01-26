@@ -13,7 +13,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import xyz.msws.tracker.utils.Logger;
+import xyz.msws.tracker.Client;
 
 /**
  * Support for specifying servers from a config file
@@ -24,11 +24,11 @@ import xyz.msws.tracker.utils.Logger;
 public class TrackerConfig {
 
 	private File file;
-//	private List<ServerData> servers = new ArrayList<>();
 	private Map<ServerData, String> servers = new HashMap<>();
 
 	public TrackerConfig(File file) {
-		Logger.logf("Creating new tracker config from %s (%s)", file.getName(), file.getAbsolutePath());
+		Client.getLogger().info(
+				String.format("Creating new tracker config from %s (%s)", file.getName(), file.getAbsolutePath()));
 		this.file = file;
 		FileReader fread;
 		if (!file.exists())
@@ -44,7 +44,7 @@ public class TrackerConfig {
 			JsonObject serverObj = obj.get("servers").getAsJsonObject();
 			for (Entry<String, JsonElement> entry : serverObj.entrySet()) {
 				if (!(entry.getValue().isJsonObject())) {
-					Logger.logf("%s is not a json object", entry.getKey());
+					Client.getLogger().info(String.format("%s is not a json object", entry.getKey()));
 					continue;
 				}
 				JsonObject serverEntry = entry.getValue().getAsJsonObject();
@@ -58,7 +58,7 @@ public class TrackerConfig {
 	}
 
 	public void save() {
-		Logger.log("Saving Tracker Config...");
+		Client.getLogger().info("Saving Tracker Config...");
 		JsonObject data = new JsonObject();
 
 		JsonObject map = new JsonObject();

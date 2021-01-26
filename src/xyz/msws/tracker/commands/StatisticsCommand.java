@@ -5,7 +5,6 @@ import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -35,8 +34,30 @@ public class StatisticsCommand extends AbstractCommand {
 	public void execute(Message message, String[] args) {
 		EmbedBuilder builder = new EmbedBuilder();
 		if (args.length == 0) {
-			builder.setTitle("Statistics");
+			builder.setTitle("Bot Statistics");
 			builder.setColor(Color.GREEN);
+
+			String oldest = null, newest = null;
+			long oldestLong = 0, newestLong = 0;
+			for (ServerPlayer p : tracker.getPlayers()) {
+				long pt = p.getPlaytimeSince(0);
+				long joined = p.getFirstPlayed();
+
+				if (pt > oldestLong) {
+					oldest = p.getRawName();
+					oldestLong = pt;
+				}
+				if (joined > newestLong) {
+					newest = p.getRawName();
+					newestLong = joined;
+				}
+			}
+
+			builder.addField("Most Playtime",
+					oldest + " (" + TimeParser.getDurationDescription(oldestLong / 1000) + ")", true);
+			builder.addField("Newest Player",
+					newest + " (Joined " + TimeParser.getDurationDescription(oldestLong / 1000) + " ago)", true);
+
 			builder.addField("Total Players", tracker.getPlayers().size() + "", true);
 			builder.addField("Servers", tracker.getServers().size() + "", true);
 			builder.addField("Uptime", TimeParser.getDurationDescription((System.currentTimeMillis() - start) / 1000),
@@ -83,28 +104,19 @@ public class StatisticsCommand extends AbstractCommand {
 						player = p;
 
 			if (player == null) {
-				message.getChannel().sendMessage(
-						"Unknown server, available options: \n-" + String.join("\n- ", tracker.getServerNames()))
-						.queue();
+				message.getChannel().sendMessage("Unknown server / player, available options: \n-"
+						+ String.join("\n- ", tracker.getServerNames())).queue();
 				return;
 			}
+
+			builder.setColor(Color.BLUE);
 
 			builder.setTitle(player.getRawName() + " Statistics");
 			Map<String, Long> servers = new HashMap<>();
 
-			long last = 0;
-			for (String s : tracker.getServerNames()) {
-				servers.put(s, player.getPlaytimeSince(0, s));
-				List<Entry<Long, Long>> times = new ArrayList<>(
-						player.getTimes().getOrDefault(s, new LinkedHashMap<>()).entrySet());
-				if (times.isEmpty())
-					continue;
-				long t = times.get(times.size() - 1).getValue();
-				if (t > last || t == -1) {
-					last = t;
-					serverName = s;
-				}
-			}
+			long last = player.getLastPlayed(), first = player.getFirstPlayed();
+			String lastName = player.getLastPlayedName(), firstName = player.getFirstPlayedName();
+
 			List<Entry<String, Long>> sorted = new ArrayList<>(servers.entrySet());
 			sorted.sort(new Comparator<Entry<String, Long>>() {
 				@Override
@@ -118,16 +130,23 @@ public class StatisticsCommand extends AbstractCommand {
 						entry.getKey() + ": " + TimeParser.getDurationDescription(entry.getValue() / 1000) + "\n");
 			}
 
-			builder.addField("Last Online", serverName + " "
-					+ (last == -1 ? "Now"
-							: TimeParser.getDurationDescription((System.currentTimeMillis() - last) / 1000))
-					+ " ago", true);
+			builder.addField(
+					"First Played On", firstName + " ("
+							+ TimeParser.getDurationDescription((System.currentTimeMillis() - first) / 1000) + " ago)",
+					true);
+
+			builder.addField("Last Online On",
+					lastName + " (" + (last == -1 ? "Now"
+							: TimeParser.getDurationDescription((System.currentTimeMillis() - last) / 1000) + " ago")
+							+ ")",
+					true);
 
 			message.getChannel().sendMessage(builder.build()).queue();
 			return;
 		}
 
 		builder.setTitle(serverName + " Statistics ");
+		builder.setColor(Color.RED);
 		builder.appendDescription("**Player Counts Within**:\n");
 
 		for (long time : new long[] { 1000 * 60 * 60, 1000 * 60 * 60 * 24, 1000 * 60 * 60 * 24 * 3,

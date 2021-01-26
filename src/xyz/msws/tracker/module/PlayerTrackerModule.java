@@ -20,7 +20,7 @@ import xyz.msws.tracker.PlayerTracker;
 import xyz.msws.tracker.data.ServerData;
 import xyz.msws.tracker.data.ServerPlayer;
 import xyz.msws.tracker.data.ServerStatus;
-import xyz.msws.tracker.utils.Logger;
+import xyz.msws.tracker.utils.MSG;
 
 public class PlayerTrackerModule extends Module {
 	private Map<String, ServerPlayer> players = new ConcurrentHashMap<>();
@@ -52,14 +52,14 @@ public class PlayerTrackerModule extends Module {
 
 		servers.values().forEach(s -> timer.schedule(s, 0, 1000 * 30));
 
-		Logger.logf("Loading all player files...");
+		Client.getLogger().info(String.format("Loading all player files..."));
 
 		if (PlayerTracker.PLAYER_FILE.listFiles() == null) {
 			try {
 				PlayerTracker.PLAYER_FILE.getParentFile().createNewFile();
 			} catch (IOException e) {
 				e.printStackTrace();
-				Logger.log(e);
+				Client.getLogger().info(MSG.toString(e));
 			}
 		} else {
 			for (File f : PlayerTracker.PLAYER_FILE.listFiles()) {
@@ -70,7 +70,7 @@ public class PlayerTrackerModule extends Module {
 			}
 		}
 
-		Logger.logf("Loaded %d files", players.size());
+		Client.getLogger().info(String.format("Loaded %d files", players.size()));
 	}
 
 	private void purge(TextChannel channel) {
@@ -100,7 +100,7 @@ public class PlayerTrackerModule extends Module {
 	}
 
 	public void deleteAllData() {
-		Logger.log("Deleting all player data...");
+		Client.getLogger().warning("Deleting all player data...");
 		players = new HashMap<>();
 		if (PlayerTracker.PLAYER_FILE.listFiles() != null)
 			for (File f : PlayerTracker.PLAYER_FILE.listFiles())

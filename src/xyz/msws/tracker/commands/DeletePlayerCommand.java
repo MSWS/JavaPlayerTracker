@@ -1,29 +1,25 @@
 package xyz.msws.tracker.commands;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.events.message.guild.react.GuildMessageReactionAddEvent;
 import xyz.msws.tracker.Client;
 import xyz.msws.tracker.data.Callback;
-import xyz.msws.tracker.data.pageable.Pageable;
-import xyz.msws.tracker.data.pageable.PageableText;
+import xyz.msws.tracker.data.pageable.Confirmation;
+import xyz.msws.tracker.data.pageable.Selector;
 import xyz.msws.tracker.module.PlayerTrackerModule;
 import xyz.msws.tracker.utils.MSG;
 
 public class DeletePlayerCommand extends AbstractCommand {
+	private PlayerTrackerModule tracker;
 
 	public DeletePlayerCommand(Client client, String name) {
 		super(client, name);
 		setAliases("dp");
 		setPermission(Permission.ADMINISTRATOR);
+		setDescription("Deletes specified player data");
 		tracker = client.getModule(PlayerTrackerModule.class);
 	}
-
-	private PlayerTrackerModule tracker;
 
 	@Override
 	public void execute(Message message, String[] args) {
@@ -36,104 +32,46 @@ public class DeletePlayerCommand extends AbstractCommand {
 			return;
 		}
 
-		if (args[0].equalsIgnoreCase("all")) {
-			delete(args[0], message);
-			return;
-		}
-
-		String given = String.join(" ", args), simp = MSG.simplify(given.replace(" ", ""));
-		List<String> results = new ArrayList<>();
-		for (String s : tracker.getPlayerNames()) {
-			String ss = MSG.simplify(s.replace(" ", ""));
-			if (s.equals(given)) {
-				delete(s, message);
-				break;
-			}
-			if (ss.contains(simp) || simp.contains(ss))
-				results.add(s);
-		}
-		if (results.size() == 1) {
-			delete(results.get(0), message);
-			return;
-		}
-		if (results.isEmpty()) {
-			message.getChannel().sendMessage("No players matched your search").queue();
-			return;
-		}
-		Comparator<String> cmp = new Comparator<String>() {
+		Callback<String> call = new Callback<String>() {
 			@Override
-			public int compare(String o1, String o2) {
-				int s1 = MSG.simplify(o1.replace(" ", "")).compareTo(simp);
-				int s2 = MSG.simplify(o2.replace(" ", "")).compareTo(simp);
-				return s1 == s2 ? 0 : s1 > s2 ? -1 : 1;
-			}
-		};
-		results.sort(cmp);
-
-		List<String> messages = new ArrayList<>();
-
-		int size = 5;
-
-		StringBuilder builder = new StringBuilder();
-		for (int i = 0; i < results.size(); i++) {
-			builder.append((i % size) + 1).append(": ").append(results.get(i)).append("\n");
-			if ((i + 1) % size == 0) {
-				messages.add(builder.toString());
-				builder = new StringBuilder();
-			}
-		}
-		if (builder.length() != 0)
-			messages.add(builder.toString());
-
-		String[] nums = new String[] { "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣" };
-
-		Pageable<?> pager = new PageableText(client, messages).bindTo(message.getAuthor());
-
-		for (int i = 0; i < Math.min(nums.length, results.size()); i++) {
-			final int fi = i;
-			pager.addCallback(nums[i], new Callback<GuildMessageReactionAddEvent>() {
-				@Override
-				public void execute(GuildMessageReactionAddEvent call) {
-					delete(results.get(fi + (pager.getPage() * size)), message);
-				}
-			});
-		}
-		pager.send(message.getTextChannel());
-	}
-
-	private void delete(String player, Message message) {
-		Pageable<?> pager = new PageableText(client,
-				player.equalsIgnoreCase("all") ? "Do you really want to delete **ALL** player data?"
-						: "Are you sure you want to delete **" + player + "**'s data?").bindTo(message.getAuthor());
-		pager.addCallback("✅", confirm(player));
-		pager.addCallback("❌", cancel());
-		pager.send(message.getTextChannel());
-	}
-
-	private Callback<GuildMessageReactionAddEvent> confirm(String player) {
-		return new Callback<GuildMessageReactionAddEvent>() {
-			@Override
-			public void execute(GuildMessageReactionAddEvent call) {
-				if (player.equalsIgnoreCase("all")) {
-					tracker.deleteAllData();
-					call.getChannel().sendMessage("Successfully deleted all player data.").queue();
-					call.retrieveMessage().queue(m -> m.delete());
+			public void execute(String call) {
+				if (call == null)
 					return;
-				}
-				tracker.getPlayer(player).delete();
-				tracker.deletePlayer(player);
-				call.getChannel().sendMessage("Successfully deleted " + player + "'s data.").queue();
-				call.retrieveMessage().queue(m -> m.delete());
-			}
-		};
-	}
 
-	private Callback<GuildMessageReactionAddEvent> cancel() {
-		return new Callback<GuildMessageReactionAddEvent>() {
-			@Override
-			public void execute(GuildMessageReactionAddEvent call) {
-				call.retrieveMessage().queue(m -> m.delete());
+				Confirmation conf = new Confirmation(client,
+						call.equals("all") ? "Do you really want to delete **ALL** player data?"
+								: "Are you sure you want to delete **" + call + "**'s data?");
+				conf.confirm(new Callback<GuildMessageReactionAddEvent>() {
+
+					@Override
+					public void execute(GuildMessageReactionAddEvent c) {
+						c.retrieveMessage().queue(m -> m.delete().queue());
+						if (call.equalsIgnoreCase("all")) {
+							tracker.deleteAllData();
+							c.getChannel().sendMessage("Successfully deleted all player data.").queue();
+							return;
+						}
+						tracker.getPlayer(call).delete();
+						tracker.deletePlayer(call);
+						c.getChannel().sendMessage("Successfully deleted " + call + "'s data.").queue();
+					}
+				});
 			}
 		};
+
+		if (args[0].equalsIgnoreCase("all")) {
+			call.execute("all");
+			return;
+		}
+		Selector<String> ps = new Selector<>(tracker.getPlayerNames());
+		String term = String.join(" ", args);
+		ps.filter(s -> {
+			String ss = MSG.simplify(s.replace(" ", ""));
+			return (s.equals(term) || ss.contains(term) || term.contains(ss));
+		});
+		ps.sortLexi(term);
+		ps.setAction(call);
+		ps.send(client, message);
+
 	}
 }

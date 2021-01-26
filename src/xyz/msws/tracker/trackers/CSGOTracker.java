@@ -10,7 +10,7 @@ import xyz.msws.tracker.Client;
 import xyz.msws.tracker.data.ServerData;
 import xyz.msws.tracker.data.ServerPlayer;
 import xyz.msws.tracker.module.PlayerTrackerModule;
-import xyz.msws.tracker.utils.Logger;
+import xyz.msws.tracker.utils.MSG;
 
 public class CSGOTracker extends Tracker {
 
@@ -28,7 +28,7 @@ public class CSGOTracker extends Tracker {
 					connection.updateServerInfo();
 				} catch (Exception e) {
 					e.printStackTrace();
-					Logger.log(e);
+					Client.getLogger().warning(MSG.toString(e));
 				}
 			}
 		}, 10000, 1000 * 60 * 5);
@@ -68,7 +68,7 @@ public class CSGOTracker extends Tracker {
 			tracker.update(server, connection);
 		} catch (Exception e) {
 			e.printStackTrace();
-			Logger.log(e);
+			Client.getLogger().warning(MSG.toString(e));
 		}
 	}
 

@@ -16,8 +16,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import xyz.msws.tracker.Client;
 import xyz.msws.tracker.PlayerTracker;
-import xyz.msws.tracker.utils.Logger;
 
 /**
  * Encapsulates server data including server name, ip, port, and map history
@@ -80,7 +80,7 @@ public class ServerData {
 	 * @return
 	 */
 	private boolean loadData() {
-		Logger.logf("Loading server data of %s", name);
+		Client.getLogger().info(String.format("Loading server data of %s", name));
 		FileReader fread;
 		if (!file.exists())
 			return false;
@@ -91,7 +91,7 @@ public class ServerData {
 			reader.close();
 			JsonElement obj = JsonParser.parseString(data);
 			if (!obj.isJsonObject()) {
-				Logger.logf("Json data from file %s is invalid", file.getName());
+				Client.getLogger().info(String.format("Json data from file %s is invalid", file.getName()));
 				return false;
 			}
 
@@ -102,7 +102,7 @@ public class ServerData {
 
 			JsonElement mapData = dat.get("maps");
 			if (!mapData.isJsonObject()) {
-				Logger.logf("Unable to load mapdata from %s", file.getName());
+				Client.getLogger().info(String.format("Unable to load mapdata from %s", file.getName()));
 				return true;
 			}
 
@@ -111,13 +111,14 @@ public class ServerData {
 			for (Entry<String, JsonElement> entry : mapObj.entrySet()) {
 				Set<Long> times = new HashSet<>();
 				if (!entry.getValue().isJsonArray()) {
-					Logger.logf("Unable to load map timings for map %s from %s", entry.getKey(), file.getName());
+					Client.getLogger().info(String.format("Unable to load map timings for map %s from %s",
+							entry.getKey(), file.getName()));
 					continue;
 				}
 				for (JsonElement p : entry.getValue().getAsJsonArray()) {
 					if (!p.isJsonPrimitive()) {
-						Logger.logf("Timing report %s from map %s in file %s is malformed", p.toString(),
-								entry.getKey(), file.getName());
+						Client.getLogger().info(String.format("Timing report %s from map %s in file %s is malformed",
+								p.toString(), entry.getKey(), file.getName()));
 						continue;
 					}
 					if (p.getAsLong() > big) {

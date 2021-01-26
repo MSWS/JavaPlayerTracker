@@ -17,7 +17,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import xyz.msws.tracker.PlayerTracker;
-import xyz.msws.tracker.utils.Logger;
 import xyz.msws.tracker.utils.MSG;
 
 /**
@@ -36,7 +35,6 @@ public class ServerPlayer {
 	public ServerPlayer(String rawName) {
 		this.rawName = rawName;
 		this.name = MSG.simplify(rawName);
-
 		file = new File(PlayerTracker.PLAYER_FILE, name + ".txt");
 		if (!file.getParentFile().exists())
 			file.getParentFile().mkdirs();
@@ -50,7 +48,7 @@ public class ServerPlayer {
 
 	private boolean load() {
 		if (!times.isEmpty()) {
-			Logger.log("[WARNING] Attempted to load while data was already loaded");
+			PlayerTracker.getLogger().warning("Attempted to load while data was already loaded");
 		}
 		if (!file.exists())
 			return false;
@@ -61,22 +59,24 @@ public class ServerPlayer {
 			String data = reader.readLine();
 			reader.close();
 			if (data == null) {
-				Logger.logf("%s's data is null", file.getName());
+				PlayerTracker.getLogger().severe(String.format("%s's data is null", file.getName()));
 				return false;
 			}
 			JsonElement obj = JsonParser.parseString(data);
 			if (!obj.isJsonObject()) {
-				Logger.logf("Json data from file %s is invalid", file.getName());
+				PlayerTracker.getLogger().severe(String.format("Json data from file %s is invalid", file.getName()));
 				return false;
 			}
 
 			JsonObject dat = obj.getAsJsonObject();
 			if (!dat.has("name")) {
-				Logger.logf("Json data from file %s does not have name", file.getName());
+				PlayerTracker.getLogger()
+						.severe(String.format("Json data from file %s does not have name", file.getName()));
 				return false;
 			}
 			if (dat.get("name").isJsonNull()) {
-				Logger.logf("Json data from file %s has null name", file.getName());
+				PlayerTracker.getLogger()
+						.warning(String.format("Json data from file %s has null name", file.getName()));
 				return false;
 			}
 
@@ -85,7 +85,8 @@ public class ServerPlayer {
 
 			JsonElement timeData = dat.get("time");
 			if (!timeData.isJsonObject()) {
-				Logger.logf("Player data %s is malformed from file %s", timeData.toString(), file.getName());
+				PlayerTracker.getLogger().warning(
+						String.format("Player data %s is malformed from file %s", timeData.toString(), file.getName()));
 				return false;
 			}
 
@@ -94,8 +95,9 @@ public class ServerPlayer {
 			for (Entry<String, JsonElement> entry : timeObj.entrySet()) {
 				String server = entry.getKey();
 				if (!entry.getValue().isJsonObject()) {
-					Logger.logf("Skipping server data %s because it is malformed (%s)", server,
-							entry.getValue().toString());
+					PlayerTracker.getLogger()
+							.severe(String.format("Skipping server data %s because it is malformed (%s)", server,
+									entry.getValue().toString()));
 					continue;
 				}
 				LinkedHashMap<Long, Long> timeMap = new LinkedHashMap<Long, Long>();
@@ -104,7 +106,8 @@ public class ServerPlayer {
 				for (Entry<String, JsonElement> e : entry.getValue().getAsJsonObject().entrySet()) {
 					long c = Long.parseLong(e.getKey());
 					if (c < last) {
-						Logger.logf("WARNING Loading data of %s and it is unordered", rawName);
+						PlayerTracker.getLogger()
+								.warning(String.format("WARNING Loading data of %s and it is unordered", rawName));
 					}
 					timeMap.put(Long.parseLong(e.getKey()), e.getValue().getAsLong());
 				}
@@ -137,15 +140,16 @@ public class ServerPlayer {
 				long end = e.getValue();
 				if (end == -1) {
 					if (online) {
-						Logger.log("WARNING More than 1 entry had a value of -1 for player " + rawName);
-						Logger.logf("%d: %d", e.getKey(), e.getValue());
+						PlayerTracker.getLogger()
+								.warning(String.format("More than 1 entry had a value of -1 for player " + rawName));
+						PlayerTracker.getLogger().warning(String.format("%d: %d", e.getKey(), e.getValue()));
 					}
 					online = true;
 					end = System.currentTimeMillis();
 				}
 
 				if (e.getKey() < last)
-					Logger.logf("WARNING Player data of %s is unordered", rawName);
+					PlayerTracker.getLogger().warning(String.format("Player data of %s is unordered", rawName));
 
 				times.addProperty(e.getKey().toString(), end);
 			}
@@ -209,9 +213,9 @@ public class ServerPlayer {
 	 */
 	public void logOff(ServerData server) {
 		if (this.times.getOrDefault(server.getName(), new LinkedHashMap<>()).isEmpty()) {
-			Logger.logf("[WARNING] Desynchronization of player tracking, attempted to logOff %s when not logged on",
-					rawName + "");
-			Logger.logf("Error type: empty");
+			PlayerTracker.getLogger().warning(String.format(
+					"Desynchronization of player tracking, attempted to logOff %s when not logged on", rawName + ""));
+			PlayerTracker.getLogger().warning("Error type: empty");
 			return;
 		}
 		List<Entry<Long, Long>> sessions = new ArrayList<>();
@@ -223,8 +227,9 @@ public class ServerPlayer {
 		for (Entry<Long, Long> entry : sessions) {
 			if (entry.getValue() == -1) {
 				if (online) {
-					Logger.log("[WARNING] Attempted to log off a player that should have already been logged off");
-					Logger.logf("%d: %d", entry.getKey(), entry.getValue());
+					PlayerTracker.getLogger()
+							.warning("Attempted to log off a player that should have already been logged off");
+					PlayerTracker.getLogger().warning(String.format("%d: %d", entry.getKey(), entry.getValue()));
 					entry.setValue(System.currentTimeMillis());
 				}
 				online = true;
@@ -234,16 +239,19 @@ public class ServerPlayer {
 		Entry<Long, Long> entry = sessions.get(sessions.size() - 1);
 
 		if (entry.getValue() != -1) {
-			Logger.logf("[WARNING] Desynchronization of player tracking, attempted to logOff %s when not logged on",
-					rawName);
-			Logger.logf("Error type: -1");
-			Logger.logf("Actual value: " + entry.getValue() + " key: " + entry.getKey() + " (time ago: "
-					+ (System.currentTimeMillis() - entry.getKey()) + ")");
-			Logger.logf("0 index: %d", sessions.get(0).getValue());
+			PlayerTracker.getLogger()
+					.warning(String.format(
+							"[WARNING] Desynchronization of player tracking, attempted to logOff %s when not logged on",
+							rawName));
+			PlayerTracker.getLogger().warning("Error type: -1");
+			PlayerTracker.getLogger().warning("Actual value: " + entry.getValue() + " key: " + entry.getKey()
+					+ " (time ago: " + (System.currentTimeMillis() - entry.getKey()) + ")");
+			PlayerTracker.getLogger().warning(String.format("0 index: %d", sessions.get(0).getValue()));
 			for (Entry<Long, Long> v : sessions) {
-				Logger.logf("%d: %d", v.getKey(), v.getValue());
+				PlayerTracker.getLogger().warning(String.format("%d: %d", v.getKey(), v.getValue()));
 			}
-			sessions.forEach((k) -> Logger.logf("> %d: %d", k.getKey(), k.getValue()));
+			sessions.forEach(
+					(k) -> PlayerTracker.getLogger().warning(String.format("> %d: %d", k.getKey(), k.getValue())));
 			return;
 		}
 
@@ -267,6 +275,109 @@ public class ServerPlayer {
 			return false;
 		ServerPlayer sp = (ServerPlayer) obj;
 		return sp.getRawName().equals(this.getRawName());
+	}
+
+	/**
+	 * Gets the server that the player first played on, null if they've never logged
+	 * on
+	 * 
+	 * @return
+	 */
+	public String getFirstPlayedName() {
+		String firstName = null;
+		long first = Long.MAX_VALUE;
+		for (String s : times.keySet()) {
+			long firstPlayed = getFirstPlayed(s);
+			if (firstPlayed < first) {
+				firstName = s;
+				first = firstPlayed;
+			}
+		}
+		return firstName;
+	}
+
+	/**
+	 * Gets when the player first played on the specified server, returns
+	 * {@link Long#MAX_VALUE} if they've never logged on
+	 * 
+	 * @param server
+	 * @return
+	 */
+	public long getFirstPlayed(String server) {
+		LinkedHashMap<Long, Long> t = times.getOrDefault(server == null ? getFirstPlayedName() : server,
+				new LinkedHashMap<>());
+		if (t.isEmpty())
+			return Long.MAX_VALUE;
+		List<Entry<Long, Long>> ts = new ArrayList<>(t.entrySet());
+
+		return ts.get(0).getKey();
+	}
+
+	/**
+	 * Gets when the player first played, returns {@link Long#MAX_VALUE} if they've
+	 * never logged on
+	 * 
+	 * @param server
+	 * @return
+	 */
+	public long getFirstPlayed() {
+		return getFirstPlayed(null);
+	}
+
+	/**
+	 * Gets the server that the player last played on, null if they've never played
+	 * 
+	 * @return
+	 */
+	public String getLastPlayedName() {
+		String lastName = null;
+		long last = 0;
+		for (String s : times.keySet()) {
+			long lastPlayed = getLastPlayed(s);
+			if (lastPlayed == -1) {
+				return s;
+			}
+			if (lastPlayed > last) {
+				lastName = s;
+				last = lastPlayed;
+			}
+		}
+		return lastName;
+
+	}
+
+	/**
+	 * Gets when the player last played on the specified server
+	 * 
+	 * @param server
+	 * @return
+	 */
+	public long getLastPlayed(String server) {
+		LinkedHashMap<Long, Long> t = times.getOrDefault(server == null ? getFirstPlayedName() : server,
+				new LinkedHashMap<>());
+		if (t.isEmpty())
+			return Long.MAX_VALUE;
+		List<Entry<Long, Long>> ts = new ArrayList<>(t.entrySet());
+
+		return ts.get(ts.size() - 1).getValue();
+	}
+
+	/**
+	 * Gets when the player last played
+	 * 
+	 * @param server
+	 * @return
+	 */
+	public long getLastPlayed() {
+		return getLastPlayed(null);
+	}
+
+	public long getTotalPlaytime() {
+		return getTotalPlaytime(null);
+	}
+
+	public long getTotalPlaytime(String server) {
+		return getPlaytimeSince(0, server);
 	}
 
 	public long getPlaytimeSince(long start) {

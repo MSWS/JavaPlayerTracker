@@ -62,7 +62,7 @@ public class PlaytimeCommand extends AbstractCommand {
 				to = System.currentTimeMillis() - time;
 				setTo = true;
 			} else {
-				message.getChannel().sendMessage("Unnecessary extra parameter: " + s).queue();
+				message.getChannel().sendMessage("Unused extra parameter: " + s).queue();
 			}
 		}
 

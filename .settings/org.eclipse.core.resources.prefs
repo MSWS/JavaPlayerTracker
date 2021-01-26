@@ -1,6 +1,8 @@
 eclipse.preferences.version=1
 encoding//src/xyz/msws/tracker/commands/DeletePlayerCommand.java=UTF-8
 encoding//src/xyz/msws/tracker/commands/DeleteServerCommand.java=UTF-8
+encoding//src/xyz/msws/tracker/data/pageable/Confirmation.java=UTF-8
 encoding//src/xyz/msws/tracker/data/pageable/Pageable.java=UTF-8
 encoding//src/xyz/msws/tracker/data/pageable/PageableEmbed.java=UTF-8
 encoding//src/xyz/msws/tracker/data/pageable/PageableText.java=UTF-8
+encoding//src/xyz/msws/tracker/data/pageable/Selector.java=UTF-8

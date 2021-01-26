@@ -20,16 +20,22 @@ public class AddServerCommand extends AbstractCommand {
 		setPermission(Permission.ADMINISTRATOR);
 		setUsage("[server]:[port] [name] [channel]");
 
-		if (client instanceof PlayerTracker) {
+		if (client instanceof PlayerTracker)
 			config = ((PlayerTracker) client).getConfig();
-		}
+
 		tracker = client.getModule(PlayerTrackerModule.class);
+		if (tracker == null)
+			client.getCommandListener().unregisterCommand(this);
 	}
 
 	@Override
 	public void execute(Message message, String[] args) {
 		if (args.length < 3) {
 			message.getChannel().sendMessage("Invalid usage, please check proper format.").queue();
+			return;
+		}
+		if (config == null) {
+			message.getChannel().sendMessage("Tracker config is disabled.").queue();
 			return;
 		}
 		String server = args[0];
@@ -40,7 +46,7 @@ public class AddServerCommand extends AbstractCommand {
 		String channel = args[2];
 
 		if (message.getGuild().getTextChannelsByName(channel, true).isEmpty()) {
-			message.getChannel().sendMessage("Unknown channel: " + channel).queue();
+			message.getChannel().sendMessage("Unknown channel: `" + channel + "`").queue();
 			return;
 		}
 
@@ -55,7 +61,11 @@ public class AddServerCommand extends AbstractCommand {
 		config.save();
 		tracker.addServer(data);
 
-		message.getChannel().sendMessage("Added server: " + name);
+		PlayerTracker.getLogger().info(message.getAuthor().getAsTag() + " added a server");
+
+		message.getChannel()
+				.sendMessage("Successfully added the server " + name + "\nIP: " + server + "\nChannel: " + channel)
+				.queue();
 	}
 
 }

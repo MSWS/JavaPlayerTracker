@@ -16,7 +16,6 @@ import javax.net.ssl.HttpsURLConnection;
 import net.dv8tion.jda.api.entities.Message;
 import xyz.msws.tracker.Client;
 import xyz.msws.tracker.data.Callback;
-import xyz.msws.tracker.utils.Logger;
 
 public class LogsCommand extends AbstractCommand {
 
@@ -30,13 +29,14 @@ public class LogsCommand extends AbstractCommand {
 	@Override
 	public void execute(Message message, String[] args) {
 		List<String> out = new ArrayList<>();
-		if (Logger.getLogs().isEmpty()) {
+
+		if (client.getLogs().isEmpty()) {
 			message.getChannel().sendMessage("No logs are available").queue();
 			return;
 		}
 
-		for (int i = Math.max(Logger.getLogs().size() - 10, 0); i < Logger.getLogs().size(); i++)
-			out.add(Logger.getLogs().get(i));
+		for (int i = Math.max(client.getLogs().size() - 10, 0); i < client.getLogs().size(); i++)
+			out.add(client.getLogs().get(i));
 
 		message.getChannel().sendMessage("```\n" + String.join("\n", out) + "```").queue();
 		message.getChannel().sendMessage("Uploading logs...").queue();
@@ -55,7 +55,7 @@ public class LogsCommand extends AbstractCommand {
 			}
 		};
 		pasteUpload("PlayerTracker Logs (Requested by " + message.getAuthor().getAsTag() + ")",
-				String.join("\n", Logger.getLogs()), result);
+				String.join("\n", client.getLogs()), result);
 
 	}
 

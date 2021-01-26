@@ -7,8 +7,8 @@ import xyz.msws.tracker.Client;
 import xyz.msws.tracker.PlayerTracker;
 import xyz.msws.tracker.data.Callback;
 import xyz.msws.tracker.data.TrackerConfig;
-import xyz.msws.tracker.data.pageable.Pageable;
-import xyz.msws.tracker.data.pageable.PageableText;
+import xyz.msws.tracker.data.pageable.Confirmation;
+import xyz.msws.tracker.data.pageable.Selector;
 import xyz.msws.tracker.module.PlayerTrackerModule;
 
 public class DeleteServerCommand extends AbstractCommand {
@@ -35,39 +35,32 @@ public class DeleteServerCommand extends AbstractCommand {
 
 		String n = String.join(" ", args);
 
-		if (!tracker.getServerNames().contains(n)) {
-			message.getChannel().sendMessage("Unknown server.").queue();
-			return;
-		}
-
-		Pageable<?> pager = new PageableText(client, "Are you sure you want to delete the server data of " + n);
-		pager.addCallback("✅", confirm(n));
-		pager.addCallback("❌", cancel());
-		pager.bindTo(message.getAuthor());
-		pager.send(message.getTextChannel());
-	}
-
-	private Callback<GuildMessageReactionAddEvent> confirm(String server) {
-		return new Callback<GuildMessageReactionAddEvent>() {
+		Selector<String> servers = new Selector<>(tracker.getServerNames());
+		servers.filter(s -> s.toLowerCase().contains(n.toLowerCase()));
+		servers.sortLexi(n);
+		servers.setAction(new Callback<String>() {
 
 			@Override
-			public void execute(GuildMessageReactionAddEvent call) {
-				tracker.deleteServer(server);
-				config.removeServer(tracker.getServer(server));
-				config.save();
-				call.getChannel().sendMessage("Successfully deleted server data of " + server).queue();
-				call.retrieveMessage().queue(m -> m.delete());
+			public void execute(String call) {
+				if (call == null) {
+					message.getChannel().sendMessage("Unknown server.").queue();
+					return;
+				}
+				Confirmation conf = new Confirmation(client, "Are you sure you want to delete the server data of " + n);
+				conf.confirm(new Callback<GuildMessageReactionAddEvent>() {
+					@Override
+					public void execute(GuildMessageReactionAddEvent react) {
+						tracker.deleteServer(call);
+						config.removeServer(tracker.getServer(call));
+						config.save();
+						react.getChannel().sendMessage("Successfully deleted server data of " + call).queue();
+						react.retrieveMessage().queue(m -> m.delete());
+					}
+				});
+				conf.send(message);
 			}
-		};
-	}
-
-	private Callback<GuildMessageReactionAddEvent> cancel() {
-		return new Callback<GuildMessageReactionAddEvent>() {
-			@Override
-			public void execute(GuildMessageReactionAddEvent call) {
-				call.retrieveMessage().queue(m -> m.delete());
-			}
-		};
+		});
+		servers.send(client, message);
 	}
 
 }

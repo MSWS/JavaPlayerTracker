@@ -2,6 +2,7 @@ package xyz.msws.tracker;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDA.Status;
@@ -20,6 +21,8 @@ public abstract class Client {
 	protected JDA jda;
 	protected CommandListener commands;
 	protected List<Module> modules = new ArrayList<>();
+	protected List<String> logs = new ArrayList<>();
+	protected static Logger logger;
 
 	public Client(String token) {
 		this.token = token;
@@ -76,5 +79,13 @@ public abstract class Client {
 	 * Returns the client's prefix
 	 */
 	public abstract String getPrefix();
+
+	public static Logger getLogger() {
+		return logger;
+	}
+
+	public List<String> getLogs() {
+		return logs;
+	}
 
 }

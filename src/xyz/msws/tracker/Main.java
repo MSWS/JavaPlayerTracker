@@ -37,15 +37,6 @@ public class Main {
 			e.printStackTrace();
 			return;
 		}
-
-		try {
-			reader.close();
-			fr.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		PlayerTracker client = new PlayerTracker(token);
-		client.start();
+		new PlayerTracker(token).start();
 	}
 }
