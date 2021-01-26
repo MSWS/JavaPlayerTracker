@@ -36,7 +36,7 @@ public class StatisticsCommand extends AbstractCommand {
             String oldest = null, newest = null;
             long oldestLong = 0, newestLong = 0;
             for (ServerPlayer p : tracker.getPlayers()) {
-                long pt = p.getPlaytimeSince(0);
+                long pt = p.getTotalPlaytime();
                 long joined = p.getFirstPlayed();
 
                 if (pt > oldestLong) {
@@ -52,7 +52,7 @@ public class StatisticsCommand extends AbstractCommand {
             builder.addField("Most Playtime",
                     oldest + " (" + TimeParser.getDurationDescription(oldestLong / 1000) + ")", true);
             builder.addField("Newest Player",
-                    newest + " (Joined " + TimeParser.getDurationDescription(newestLong / 1000) + " ago)", true);
+                    newest + " (Joined " + TimeParser.getDurationDescription((System.currentTimeMillis() - newestLong) / 1000) + " ago)", true);
 
             builder.addField("Total Players", tracker.getPlayers().size() + "", true);
             builder.addField("Servers", tracker.getServers().size() + "", true);
