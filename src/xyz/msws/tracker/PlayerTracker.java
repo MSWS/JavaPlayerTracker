@@ -29,6 +29,7 @@ import xyz.msws.tracker.data.TrackerConfig;
 import xyz.msws.tracker.module.PlayerTrackerModule;
 import xyz.msws.tracker.trackers.CSGOTracker;
 import xyz.msws.tracker.trackers.Tracker;
+import xyz.msws.tracker.utils.MSG;
 
 /**
  * Tracks players on source servers
@@ -69,37 +70,46 @@ public class PlayerTracker extends Client {
 	public void start() {
 		try {
 			this.jda = JDABuilder.createDefault(token).build();
-
-			events = new AnnotatedEventManager();
-			logger.info("Setting up events...");
-			jda.setEventManager(events);
-			jda.addEventListener(commands);
-
-			logger.info("Starting timers...");
-			startTimers();
 			jda.awaitReady();
-
-			logger.info("Registering commands...");
-			commands.registerCommand(new PlaytimeCommand(this, "playtime"));
-			commands.registerCommand(new LogsCommand(this, "logs"));
-			commands.registerCommand(new StatisticsCommand(this, "statistics"));
-			commands.registerCommand(new HelpCommand(this, "help"));
-			commands.registerCommand(new DeletePlayerCommand(this, "deleteplayer"));
-			commands.registerCommand(new AddServerCommand(this, "addserver"));
-			commands.registerCommand(new DeleteServerCommand(this, "deleteserver"));
-			logger.info("Successfully registered " + commands.getCommands().size() + " commands");
-			logger.info("Loading modules...");
-			loadModules();
-
-			jda.getPresence().setActivity(Activity.watching("CS:GO Servers"));
-			MessageAction.setDefaultMentions(new ArrayList<>()); // Prevent the bot from messaging others (prevents
-																	// abuse of @everyone, @here, etc.)
 		} catch (LoginException | InterruptedException e) {
+			Client.getLogger().severe(MSG.toString(e));
 			e.printStackTrace();
 		}
+		jda.getPresence().setActivity(Activity.watching("CS:GO Servers"));
+
+		events = new AnnotatedEventManager();
+
+		logger.info("Setting up events...");
+		jda.setEventManager(events);
+		jda.addEventListener(commands);
+
+		startTimers();
+
+		registerCommands();
+
+		logger.info("Loading modules...");
+		loadModules();
+
+		// Prevent the bot from messaging others (prevents abuse of @everyone, @here,
+		// etc.)
+		MessageAction.setDefaultMentions(new ArrayList<>());
+
+	}
+
+	private void registerCommands() {
+		logger.info("Registering commands...");
+		commands.registerCommand(new PlaytimeCommand(this, "playtime"));
+		commands.registerCommand(new LogsCommand(this, "logs"));
+		commands.registerCommand(new StatisticsCommand(this, "statistics"));
+		commands.registerCommand(new HelpCommand(this, "help"));
+		commands.registerCommand(new DeletePlayerCommand(this, "deleteplayer"));
+		commands.registerCommand(new AddServerCommand(this, "addserver"));
+		commands.registerCommand(new DeleteServerCommand(this, "deleteserver"));
+		logger.info("Successfully registered " + commands.getCommands().size() + " commands");
 	}
 
 	private void startTimers() {
+		logger.info("Starting timers...");
 		Timer timer = new Timer();
 
 		List<ServerData> data = new ArrayList<>();
