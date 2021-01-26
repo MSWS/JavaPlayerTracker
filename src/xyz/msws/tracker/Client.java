@@ -22,7 +22,7 @@ public abstract class Client {
 	protected CommandListener commands;
 	protected List<Module> modules = new ArrayList<>();
 	protected List<String> logs = new ArrayList<>();
-	protected static Logger logger;
+	protected static Logger logger = Logger.getLogger(Client.class.getName());
 
 	public Client(String token) {
 		this.token = token;

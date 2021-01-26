@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Handler;
+import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
@@ -64,6 +65,7 @@ public class PlayerTracker extends Client {
 			public void close() throws SecurityException {
 			}
 		});
+		logger.setLevel(Level.SEVERE);
 	}
 
 	@Override

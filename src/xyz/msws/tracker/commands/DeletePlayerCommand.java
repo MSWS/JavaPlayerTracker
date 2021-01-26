@@ -11,7 +11,7 @@ import xyz.msws.tracker.module.PlayerTrackerModule;
 import xyz.msws.tracker.utils.MSG;
 
 public class DeletePlayerCommand extends AbstractCommand {
-	private PlayerTrackerModule tracker;
+	private final PlayerTrackerModule tracker;
 
 	public DeletePlayerCommand(Client client, String name) {
 		super(client, name);
@@ -42,7 +42,6 @@ public class DeletePlayerCommand extends AbstractCommand {
 						call.equals("all") ? "Do you really want to delete **ALL** player data?"
 								: "Are you sure you want to delete **" + call + "**'s data?");
 				conf.confirm(new Callback<GuildMessageReactionAddEvent>() {
-
 					@Override
 					public void execute(GuildMessageReactionAddEvent c) {
 						c.retrieveMessage().queue(m -> m.delete().queue());
@@ -56,6 +55,7 @@ public class DeletePlayerCommand extends AbstractCommand {
 						c.getChannel().sendMessage("Successfully deleted " + call + "'s data.").queue();
 					}
 				});
+				conf.send(message);
 			}
 		};
 
@@ -72,6 +72,5 @@ public class DeletePlayerCommand extends AbstractCommand {
 		ps.sortLexi(term);
 		ps.setAction(call);
 		ps.send(client, message);
-
 	}
 }

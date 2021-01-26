@@ -28,6 +28,8 @@ public class Confirmation {
 		Pageable<?> pager = new PageableText(client, text);
 		pager.addCallback("✅", confirm);
 		pager.addCallback("❌", cancel);
+		pager.bindTo(message.getAuthor());
+		pager.send(message.getTextChannel());
 	}
 
 	public void confirm(Callback<GuildMessageReactionAddEvent> c) {
