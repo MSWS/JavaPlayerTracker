@@ -1,21 +1,21 @@
 package xyz.msws.tracker.commands;
 
+import net.dv8tion.jda.api.entities.Message;
+import xyz.msws.tracker.Client;
+import xyz.msws.tracker.data.Callback;
+
+import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.net.ssl.HttpsURLConnection;
-
-import net.dv8tion.jda.api.entities.Message;
-import xyz.msws.tracker.Client;
-import xyz.msws.tracker.data.Callback;
 
 public class LogsCommand extends AbstractCommand {
 
@@ -45,7 +45,7 @@ public class LogsCommand extends AbstractCommand {
 
 			@Override
 			public void execute(String call) {
-				String response = "";
+				String response;
 				if (!call.startsWith("http")) {
 					response = "Unable to upload logs to pastebin, reason:\n`" + call + "`";
 				} else {
@@ -86,22 +86,22 @@ public class LogsCommand extends AbstractCommand {
 					postData.append('=');
 					postData.append(URLEncoder.encode(String.valueOf(param.getValue()), "UTF-8"));
 				}
-				byte[] postDataBytes = postData.toString().getBytes("UTF-8");
+				byte[] postDataBytes = postData.toString().getBytes(StandardCharsets.UTF_8);
 
 				con.getOutputStream().write(postDataBytes);
 				if (con.getResponseCode() != 200)
 					call.execute(con.getResponseCode() + ": " + con.getResponseMessage());
-				Reader in = new BufferedReader(new InputStreamReader(con.getInputStream(), "UTF-8"));
+				Reader in = new BufferedReader(new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8));
 
-				String result = "";
-				for (int c; (c = in.read()) >= 0;)
-					result += (char) c;
-				call.execute(result);
+				StringBuilder result = new StringBuilder();
+				for (int c; (c = in.read()) >= 0; )
+					result.append((char) c);
+				call.execute(result.toString());
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 
-		}).run();
+		}).start();
 	}
 
 }

@@ -7,13 +7,13 @@ import xyz.msws.tracker.Client;
 import xyz.msws.tracker.PlayerTracker;
 import xyz.msws.tracker.data.Callback;
 import xyz.msws.tracker.data.TrackerConfig;
-import xyz.msws.tracker.data.pageable.Confirmation;
-import xyz.msws.tracker.data.pageable.Selector;
+import xyz.msws.tracker.data.wrappers.Confirmation;
+import xyz.msws.tracker.data.wrappers.Selector;
 import xyz.msws.tracker.module.PlayerTrackerModule;
 
 public class DeleteServerCommand extends AbstractCommand {
 	private TrackerConfig config;
-	private PlayerTrackerModule tracker;
+	private final PlayerTrackerModule tracker;
 
 	public DeleteServerCommand(Client client, String name) {
 		super(client, name);
@@ -54,7 +54,7 @@ public class DeleteServerCommand extends AbstractCommand {
 						config.removeServer(tracker.getServer(call));
 						config.save();
 						react.getChannel().sendMessage("Successfully deleted server data of " + call).queue();
-						react.retrieveMessage().queue(m -> m.delete());
+						react.retrieveMessage().queue(Message::delete);
 					}
 				});
 				conf.send(message);

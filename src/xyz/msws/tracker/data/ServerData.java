@@ -1,36 +1,30 @@
 package xyz.msws.tracker.data;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import xyz.msws.tracker.Client;
+import xyz.msws.tracker.PlayerTracker;
+
+import java.io.*;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
-import xyz.msws.tracker.Client;
-import xyz.msws.tracker.PlayerTracker;
-
 /**
  * Encapsulates server data including server name, ip, port, and map history
- * 
- * @author Isaac
  *
+ * @author Isaac
  */
 public class ServerData {
 	private String name, ip;
 	private int port;
 
-	private Map<String, Set<Long>> maps = new HashMap<>();
-	private File file;
+	private final Map<String, Set<Long>> maps = new HashMap<>();
+	private final File file;
 	private String lastMap;
 
 	public ServerData(File file) {
@@ -76,14 +70,13 @@ public class ServerData {
 
 	/**
 	 * Loads the data from the file
-	 * 
-	 * @return
+	 *
 	 */
-	private boolean loadData() {
+	private void loadData() {
 		Client.getLogger().info(String.format("Loading server data of %s", name));
 		FileReader fread;
 		if (!file.exists())
-			return false;
+			return;
 		try {
 			fread = new FileReader(file);
 			BufferedReader reader = new BufferedReader(fread);
@@ -92,7 +85,7 @@ public class ServerData {
 			JsonElement obj = JsonParser.parseString(data);
 			if (!obj.isJsonObject()) {
 				Client.getLogger().info(String.format("Json data from file %s is invalid", file.getName()));
-				return false;
+				return;
 			}
 
 			JsonObject dat = obj.getAsJsonObject();
@@ -103,7 +96,7 @@ public class ServerData {
 			JsonElement mapData = dat.get("maps");
 			if (!mapData.isJsonObject()) {
 				Client.getLogger().info(String.format("Unable to load mapdata from %s", file.getName()));
-				return true;
+				return;
 			}
 
 			JsonObject mapObj = mapData.getAsJsonObject();
@@ -131,9 +124,7 @@ public class ServerData {
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
-			return false;
 		}
-		return true;
 	}
 
 	public void saveData() {
@@ -146,7 +137,7 @@ public class ServerData {
 
 		for (Entry<String, Set<Long>> entry : this.maps.entrySet()) {
 			JsonArray times = new JsonArray();
-			entry.getValue().forEach(l -> times.add(l));
+			entry.getValue().forEach(times::add);
 			maps.add(entry.getKey(), times);
 		}
 

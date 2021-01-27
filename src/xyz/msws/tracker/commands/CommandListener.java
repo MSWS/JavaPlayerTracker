@@ -1,5 +1,10 @@
 package xyz.msws.tracker.commands;
 
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.hooks.SubscribeEvent;
+import xyz.msws.tracker.Client;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -7,34 +12,21 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
-import net.dv8tion.jda.api.hooks.SubscribeEvent;
-import xyz.msws.tracker.Client;
-
 public class CommandListener {
 
-	private List<AbstractCommand> commands = new ArrayList<>();
-	private Client client;
+	private final List<AbstractCommand> commands = new ArrayList<>();
+	private final Client client;
 
 	public CommandListener(Client client) {
 		this.client = client;
 	}
 
-	public boolean registerCommand(AbstractCommand command) {
-		return commands.add(command);
+	public void registerCommand(AbstractCommand command) {
+		commands.add(command);
 	}
 
-	public boolean unregisterCommand(AbstractCommand command) {
-		return commands.remove(command);
-	}
-
-	public boolean isCommandRegistered(AbstractCommand command) {
-		return commands.contains(command);
-	}
-
-	public AbstractCommand getCommand(String name) {
-		return commands.stream().filter(cmd -> cmd.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
+	public void unregisterCommand(AbstractCommand command) {
+		commands.remove(command);
 	}
 
 	public List<AbstractCommand> getCommands() {
@@ -74,7 +66,7 @@ public class CommandListener {
 		Timer timer = new Timer();
 
 		timer.schedule(new TimerTask() {
-			long start = System.currentTimeMillis();
+			final long start = System.currentTimeMillis();
 
 			@Override
 			public void run() {

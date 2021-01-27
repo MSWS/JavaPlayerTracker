@@ -13,8 +13,8 @@ import java.util.TimerTask;
 
 public class CSGOTracker extends Tracker {
 
-    private PlayerTrackerModule tracker;
-    private Set<ServerPlayer> toSave = new HashSet<>();
+    private final PlayerTrackerModule tracker;
+    private final Set<ServerPlayer> toSave = new HashSet<>();
 
     public CSGOTracker(Client client, ServerData server) {
         super(client, server);
@@ -42,7 +42,7 @@ public class CSGOTracker extends Tracker {
             connection.updatePing();
             Set<String> unparsed = connection.getPlayers().keySet();
             for (String s : unparsed) {
-                if (s.isEmpty() || s.trim().isEmpty())
+                if (s.trim().isEmpty())
                     continue;
                 ServerPlayer sp = tracker.getPlayer(s);
                 toSave.add(sp);
@@ -55,6 +55,8 @@ public class CSGOTracker extends Tracker {
             }
 
             oldPlayers.forEach(s -> {
+                if (s.trim().isEmpty())
+                    return;
                 ServerPlayer sp = tracker.getPlayer(s);
                 toSave.add(sp);
                 sp.logOff(server);

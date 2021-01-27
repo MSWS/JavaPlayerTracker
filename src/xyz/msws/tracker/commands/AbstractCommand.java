@@ -1,19 +1,18 @@
 package xyz.msws.tracker.commands;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
 import xyz.msws.tracker.Client;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Represents a command that can be run, @see {@link CommandListener} for how
  * the execute method is run.
- * 
- * @author imodm
  *
+ * @author imodm
  */
 public abstract class AbstractCommand {
 
@@ -39,6 +38,8 @@ public abstract class AbstractCommand {
 	public boolean checkPermission(Message message, boolean verbose) {
 		if (perm == null)
 			return true;
+		if (message.getMember() == null)
+			return false;
 		if (!message.getMember().hasPermission(perm)) {
 			if (verbose) {
 				message.getChannel()

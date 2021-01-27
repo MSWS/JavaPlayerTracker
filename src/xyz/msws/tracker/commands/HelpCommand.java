@@ -1,14 +1,14 @@
 package xyz.msws.tracker.commands;
 
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
-
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import xyz.msws.tracker.Client;
 import xyz.msws.tracker.data.pageable.PageableEmbed;
+
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class HelpCommand extends AbstractCommand {
 
@@ -44,6 +44,7 @@ public class HelpCommand extends AbstractCommand {
 				builder = new EmbedBuilder();
 				builder.setColor(Color.YELLOW);
 			}
+			i++;
 		}
 		if (builder.getDescriptionBuilder().length() > 0)
 			embeds.add(builder.build());

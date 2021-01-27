@@ -1,40 +1,34 @@
 package xyz.msws.tracker.data;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import xyz.msws.tracker.Client;
+
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
-import xyz.msws.tracker.Client;
-
 /**
  * Support for specifying servers from a config file
- * 
- * @author Isaac
  *
+ * @author Isaac
  */
 public class TrackerConfig {
 
-	private File file;
-	private Map<ServerData, String> servers = new HashMap<>();
+    private final File file;
+    private final Map<ServerData, String> servers = new HashMap<>();
 
-	public TrackerConfig(File file) {
-		Client.getLogger().info(
-				String.format("Creating new tracker config from %s (%s)", file.getName(), file.getAbsolutePath()));
-		this.file = file;
-		FileReader fread;
-		if (!file.exists())
-			return;
-		try {
-			fread = new FileReader(file);
+    public TrackerConfig(File file) {
+        Client.getLogger().info(
+                String.format("Creating new tracker config from %s (%s)", file.getName(), file.getAbsolutePath()));
+        this.file = file;
+        FileReader fread;
+        if (!file.exists())
+            return;
+        try {
+            fread = new FileReader(file);
 			BufferedReader reader = new BufferedReader(fread);
 			String data = reader.readLine();
 			reader.close();

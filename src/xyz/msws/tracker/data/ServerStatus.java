@@ -1,17 +1,7 @@
 package xyz.msws.tracker.data;
 
-import java.awt.Color;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.StringJoiner;
-import java.util.TimerTask;
-import java.util.concurrent.TimeoutException;
-
 import com.github.koraktor.steamcondenser.exceptions.SteamCondenserException;
 import com.github.koraktor.steamcondenser.steam.servers.SourceServer;
-
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.TextChannel;
@@ -21,14 +11,18 @@ import xyz.msws.tracker.Client;
 import xyz.msws.tracker.PlayerTracker;
 import xyz.msws.tracker.utils.TimeParser;
 
+import java.awt.*;
+import java.util.*;
+import java.util.concurrent.TimeoutException;
+
 public class ServerStatus extends TimerTask {
-	private ServerData data;
+	private final ServerData data;
 	private TextChannel channel;
 	private Message msg;
 	private Set<String> players = new HashSet<>();
 	private String recents = "";
 	private Map<String, Object> map = new HashMap<>();
-	private Client client;
+	private final Client client;
 	private int ping = 0;
 	private long lastUpdated;
 
@@ -80,7 +74,7 @@ public class ServerStatus extends TimerTask {
 			float percent = (float) players.size() / (float) max;
 			int r = (int) (percent * 255);
 			int g = (int) ((Math.cos((map.get("mapName") + "").length()) + 1) * 255);
-			int b = (int) (Math.sin(ping) + 1 * 255);
+			int b = (int) ((Math.sin(ping) + 1) * 255);
 			r = Math.min(Math.max(r, 0), 255);
 			g = Math.min(Math.max(g, 0), 255);
 			b = Math.min(Math.max(b, 0), 255);
@@ -99,7 +93,7 @@ public class ServerStatus extends TimerTask {
 					if (!this.players.contains(p))
 						joined.add(p);
 				for (String p : this.players) {
-					if (!server.getPlayers().keySet().contains(p))
+					if (!server.getPlayers().containsKey(p))
 						left.add(p);
 				}
 				if (joined.length() > 0)

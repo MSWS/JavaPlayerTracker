@@ -11,7 +11,7 @@ import xyz.msws.tracker.module.PlayerTrackerModule;
 public class AddServerCommand extends AbstractCommand {
 
 	private TrackerConfig config;
-	private PlayerTrackerModule tracker;
+	private final PlayerTrackerModule tracker;
 
 	public AddServerCommand(Client client, String name) {
 		super(client, name);
@@ -39,10 +39,10 @@ public class AddServerCommand extends AbstractCommand {
 			return;
 		}
 		String server = args[0];
-		String name = "";
+		StringBuilder name = new StringBuilder();
 		for (int i = 1; i < args.length - 1; i++)
-			name += args[i] + " ";
-		name = name.trim();
+			name.append(args[i]).append(" ");
+		name = new StringBuilder(name.toString().trim());
 		String channel = args[2];
 
 		if (message.getGuild().getTextChannelsByName(channel, true).isEmpty()) {
@@ -50,12 +50,12 @@ public class AddServerCommand extends AbstractCommand {
 			return;
 		}
 
-		if (tracker.getServerNames().contains(name)) {
+		if (tracker.getServerNames().contains(name.toString())) {
 			message.getChannel().sendMessage("That server name is already taken.").queue();
 			return;
 		}
 
-		ServerData data = new ServerData(name, server);
+		ServerData data = new ServerData(name.toString(), server);
 
 		config.addServer(data, channel);
 		config.save();

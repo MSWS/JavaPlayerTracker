@@ -1,10 +1,6 @@
 package xyz.msws.tracker;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 
 public class Main {
 
@@ -19,7 +15,7 @@ public class Main {
 			return;
 		}
 
-		FileReader fr = null;
+		FileReader fr;
 		try {
 			fr = new FileReader(tokenFile);
 		} catch (FileNotFoundException e) {
@@ -28,7 +24,7 @@ public class Main {
 		}
 		BufferedReader reader = new BufferedReader(fr);
 
-		String token = null;
+		String token;
 		try {
 			token = reader.readLine();
 			reader.close();

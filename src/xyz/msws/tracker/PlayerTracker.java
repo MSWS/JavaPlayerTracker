@@ -1,5 +1,19 @@
 package xyz.msws.tracker;
 
+import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.hooks.AnnotatedEventManager;
+import net.dv8tion.jda.api.hooks.IEventManager;
+import net.dv8tion.jda.api.requests.restaction.MessageAction;
+import xyz.msws.tracker.commands.*;
+import xyz.msws.tracker.data.ServerData;
+import xyz.msws.tracker.data.TrackerConfig;
+import xyz.msws.tracker.module.PlayerTrackerModule;
+import xyz.msws.tracker.trackers.CSGOTracker;
+import xyz.msws.tracker.trackers.Tracker;
+import xyz.msws.tracker.utils.MSG;
+
+import javax.security.auth.login.LoginException;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -9,45 +23,20 @@ import java.util.TimerTask;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.LogRecord;
-import java.util.logging.Logger;
-
-import javax.security.auth.login.LoginException;
-
-import net.dv8tion.jda.api.JDABuilder;
-import net.dv8tion.jda.api.entities.Activity;
-import net.dv8tion.jda.api.hooks.AnnotatedEventManager;
-import net.dv8tion.jda.api.hooks.IEventManager;
-import net.dv8tion.jda.api.requests.restaction.MessageAction;
-import xyz.msws.tracker.commands.AddServerCommand;
-import xyz.msws.tracker.commands.DeletePlayerCommand;
-import xyz.msws.tracker.commands.DeleteServerCommand;
-import xyz.msws.tracker.commands.HelpCommand;
-import xyz.msws.tracker.commands.LogsCommand;
-import xyz.msws.tracker.commands.PlaytimeCommand;
-import xyz.msws.tracker.commands.StatisticsCommand;
-import xyz.msws.tracker.data.ServerData;
-import xyz.msws.tracker.data.TrackerConfig;
-import xyz.msws.tracker.module.PlayerTrackerModule;
-import xyz.msws.tracker.trackers.CSGOTracker;
-import xyz.msws.tracker.trackers.Tracker;
-import xyz.msws.tracker.utils.MSG;
 
 /**
  * Tracks players on source servers
- * 
- * @author Isaac
  *
+ * @author Isaac
  */
 public class PlayerTracker extends Client {
 
-	private TrackerConfig config;
+	private final TrackerConfig config;
 	public static final File PLAYER_FILE = new File("players"), SERVER_FILE = new File("servers");
-	private IEventManager events;
 
 	public PlayerTracker(String token) {
 		super(token);
 		this.config = new TrackerConfig(new File("config.txt"));
-		logger = Logger.getLogger(PlayerTracker.class.getName());
 		SimpleDateFormat format = new SimpleDateFormat("MM/dd/yy h:m:s.S");
 
 		logger.addHandler(new Handler() {
@@ -79,7 +68,7 @@ public class PlayerTracker extends Client {
 		}
 		jda.getPresence().setActivity(Activity.watching("CS:GO Servers"));
 
-		events = new AnnotatedEventManager();
+		IEventManager events = new AnnotatedEventManager();
 
 		logger.info("Setting up events...");
 		jda.setEventManager(events);
@@ -114,9 +103,8 @@ public class PlayerTracker extends Client {
 		logger.info("Starting timers...");
 		Timer timer = new Timer();
 
-		List<ServerData> data = new ArrayList<>();
 		List<Tracker> trackers = new ArrayList<>();
-		data.addAll(config.getServers().keySet());
+		List<ServerData> data = new ArrayList<>(config.getServers().keySet());
 
 		modules.add(new PlayerTrackerModule(this, data));
 

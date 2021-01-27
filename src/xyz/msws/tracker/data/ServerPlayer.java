@@ -18,7 +18,7 @@ import java.util.Map.Entry;
 public class ServerPlayer {
 
     private String name, rawName;
-    private File file;
+    private final File file;
 
     private Map<String, LinkedHashMap<Long, Long>> times = new HashMap<>();
 
@@ -36,12 +36,12 @@ public class ServerPlayer {
         load();
     }
 
-    private boolean load() {
+    private void load() {
         if (!times.isEmpty()) {
             PlayerTracker.getLogger().warning("Attempted to load while data was already loaded");
         }
         if (!file.exists())
-            return false;
+            return;
         FileReader fread;
         try {
             fread = new FileReader(file);
@@ -50,24 +50,24 @@ public class ServerPlayer {
             reader.close();
             if (data == null) {
                 PlayerTracker.getLogger().severe(String.format("%s's data is null", file.getName()));
-                return false;
+                return;
             }
             JsonElement obj = JsonParser.parseString(data);
             if (!obj.isJsonObject()) {
                 PlayerTracker.getLogger().severe(String.format("Json data from file %s is invalid", file.getName()));
-                return false;
+                return;
             }
 
             JsonObject dat = obj.getAsJsonObject();
             if (!dat.has("name")) {
                 PlayerTracker.getLogger()
                         .severe(String.format("Json data from file %s does not have name", file.getName()));
-                return false;
+                return;
             }
             if (dat.get("name").isJsonNull()) {
                 PlayerTracker.getLogger()
                         .warning(String.format("Json data from file %s has null name", file.getName()));
-                return false;
+                return;
             }
 
             rawName = dat.get("name").getAsString();
@@ -77,7 +77,7 @@ public class ServerPlayer {
             if (!timeData.isJsonObject()) {
                 PlayerTracker.getLogger().warning(
                         String.format("Player data %s is malformed from file %s", timeData.toString(), file.getName()));
-                return false;
+                return;
             }
 
             JsonObject timeObj = timeData.getAsJsonObject();
@@ -107,7 +107,6 @@ public class ServerPlayer {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return true;
     }
 
     public void delete() {
@@ -415,4 +414,8 @@ public class ServerPlayer {
         return result;
     }
 
+    @Override
+    public String toString() {
+        return rawName;
+    }
 }
