@@ -1,69 +1,32 @@
 package xyz.msws.tracker.data.graph;
 
-import org.knowm.xchart.BitmapEncoder;
-import org.knowm.xchart.XYChart;
-import org.knowm.xchart.style.Styler;
+import org.knowm.xchart.BoxChart;
+import org.knowm.xchart.BoxChartBuilder;
+import org.knowm.xchart.CategoryChart;
+import xyz.msws.tracker.data.ServerData;
 import xyz.msws.tracker.data.ServerPlayer;
 import xyz.msws.tracker.module.PlayerTrackerModule;
-import xyz.msws.tracker.utils.TimeParser;
 
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ServerGraph extends Graph {
 
-    public ServerGraph(PlayerTrackerModule tracker) {
+    private ServerData data;
+
+    public ServerGraph(PlayerTrackerModule tracker, ServerData data) {
         super(tracker);
+        this.data = data;
     }
 
     @Override
     public File generate() {
-        XYChart chart = new XYChart(500, 400, Styler.ChartTheme.XChart);
+        CategoryChart chart = new CategoryChart(500, 500);
 
-        chart.setTitle("Players on all servers");
-
-
-        long size = 1000 * 60 * 60 * 24;
-        long start = System.currentTimeMillis() - (size * 30);
-        chart.setXAxisTitle(TimeParser.getDurationDescription(size / 1000).split(" ")[1] + "s Ago");
-        chart.setYAxisTitle("Players");
-//        chart.setCustomXAxisTickLabelsMap();
-
-        Map<Object, Object> mappings = new HashMap<>();
-
-        for (String server : tracker.getServerNames()) {
-
-            List<Long> x = new ArrayList<>();
-            List<Integer> y = new ArrayList<>();
-
-            for (long s = start; s < System.currentTimeMillis(); s += size) {
-                int players = 0;
-                for (ServerPlayer player : tracker.getPlayers()) {
-                    long time = player.getPlaytimeDuring(s, s + size, server);
-                    if (time == 0)
-                        continue;
-                    players++;
-                }
-                if (players == 0)
-                    continue;
-                x.add(-s);
-                mappings.put(-s, (System.currentTimeMillis() - s) / size);
-                y.add(players);
-            }
-            chart.addSeries(server, x, y);
-        }
-        chart.setCustomXAxisTickLabelsMap(mappings);
-        File result = new File("output.png");
-        try {
-            BitmapEncoder.saveBitmapWithDPI(chart, "output", BitmapEncoder.BitmapFormat.PNG, 300);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return result;
+        Map<ServerPlayer, Long> rankings = new HashMap<>();
+        tracker.getPlayers().forEach(e -> rankings.put(e, e.getTotalPlaytime(data.getName())));
+        List<Map.Entry<ServerPlayer, Long>> sorted = new ArrayList<>(rankings.entrySet());
+        sorted.sort((o1, o2) -> o2.getValue().compareTo(o1.getValue()));
+        return null;
     }
-
 }

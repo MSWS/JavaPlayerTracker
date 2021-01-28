@@ -3,7 +3,7 @@ package xyz.msws.tracker.commands;
 import net.dv8tion.jda.api.entities.Message;
 import xyz.msws.tracker.Client;
 import xyz.msws.tracker.data.ServerData;
-import xyz.msws.tracker.data.graph.ServerGraph;
+import xyz.msws.tracker.data.graph.GlobalGraph;
 import xyz.msws.tracker.module.PlayerTrackerModule;
 
 import java.io.File;
@@ -29,7 +29,7 @@ public class GraphCommand extends AbstractCommand {
         if (server == null)
             return false;
 
-        File file = new ServerGraph(tracker).generate();
+        File file = new GlobalGraph(tracker).generate();
         if (file == null || !file.exists()) {
             message.getChannel().sendMessage("Unable to create graph").queue();
             return true;
