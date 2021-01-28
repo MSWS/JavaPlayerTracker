@@ -6,7 +6,6 @@ import xyz.msws.tracker.module.Module;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * Represents a discord client
@@ -14,7 +13,6 @@ import java.util.logging.Logger;
  * @author imodm
  */
 public abstract class Client {
-    protected static Logger logger = Logger.getLogger(Client.class.getName());
     protected String token;
     protected JDA jda;
     protected CommandListener commands;
@@ -24,10 +22,6 @@ public abstract class Client {
     public Client(String token) {
         this.token = token;
         commands = new CommandListener(this);
-    }
-
-    public static Logger getLogger() {
-        return logger;
     }
 
     public void loadModules() {
@@ -63,9 +57,5 @@ public abstract class Client {
      * Returns the client's prefix
      */
     public abstract String getPrefix();
-
-    public List<String> getLogs() {
-        return logs;
-    }
 
 }

@@ -7,6 +7,7 @@ import xyz.msws.tracker.PlayerTracker;
 import xyz.msws.tracker.data.ServerData;
 import xyz.msws.tracker.data.TrackerConfig;
 import xyz.msws.tracker.module.PlayerTrackerModule;
+import xyz.msws.tracker.utils.Logger;
 
 public class AddServerCommand extends AbstractCommand {
 
@@ -61,7 +62,7 @@ public class AddServerCommand extends AbstractCommand {
 		config.save();
 		tracker.addServer(data);
 
-		PlayerTracker.getLogger().info(message.getAuthor().getAsTag() + " added a server");
+		Logger.log(message.getAuthor().getAsTag() + " added a server");
 
 		message.getChannel()
 				.sendMessage("Successfully added the server " + name + "\nIP: " + server + "\nChannel: " + channel)

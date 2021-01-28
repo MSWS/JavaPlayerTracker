@@ -81,38 +81,23 @@ public class StatisticsCommand extends AbstractCommand {
     }
 
     private boolean sendServerStats(Message message, String name) {
-        String serverName = null;
-        ServerData server;
-        for (String n : tracker.getServerNames()) {
-            if (n.equalsIgnoreCase(name)) {
-                serverName = n;
-                break;
-            }
-        }
-        for (String n : tracker.getServerNames()) {
-            if (n.replace(" ", "").toLowerCase().contains(name.toLowerCase())
-                    || name.toLowerCase().contains(n.replace(" ", "").toLowerCase())) {
-                serverName = n;
-                break;
-            }
-        }
-        final String fs = serverName;
-        server = tracker.getServers().parallelStream().filter(s -> s.getName().equals(fs)).findFirst().orElse(null);
-        if (serverName == null || server == null)
+        ServerData server = tracker.findServer(name);
+        if (server == null)
             return false;
+
         EmbedBuilder builder = new EmbedBuilder();
-        builder.setTitle(serverName + " Statistics ");
+        builder.setTitle(server.getName() + " Statistics ");
         builder.setColor(Color.RED);
         builder.appendDescription("**Player Counts Within**:\n");
 
         for (long time : new long[]{1000 * 60 * 60, 1000 * 60 * 60 * 24, 1000 * 60 * 60 * 24 * 3,
                 1000 * 60 * 60 * 24 * 7}) {
             long players = tracker.getPlayers().parallelStream()
-                    .filter(p -> p.getPlaytimeSince(System.currentTimeMillis() - time, fs) > 0).count();
+                    .filter(p -> p.getPlaytimeSince(System.currentTimeMillis() - time, server.getName()) > 0).count();
 
             builder.appendDescription(TimeParser.getDurationDescription(time / 1000) + ": " + players + "\n");
         }
-        long players = tracker.getPlayers().parallelStream().filter(p -> p.getPlaytimeSince(0, fs) > 0).count();
+        long players = tracker.getPlayers().parallelStream().filter(p -> p.getPlaytimeSince(0, server.getName()) > 0).count();
         builder.appendDescription("All Time: " + players + "\n");
 
         builder.appendDescription("\n**Map Rankings**\n");

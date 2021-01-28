@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import xyz.msws.tracker.PlayerTracker;
+import xyz.msws.tracker.utils.Logger;
 import xyz.msws.tracker.utils.MSG;
 
 import java.io.*;
@@ -38,7 +39,7 @@ public class ServerPlayer {
 
     private void load() {
         if (!times.isEmpty()) {
-            PlayerTracker.getLogger().warning("Attempted to load while data was already loaded");
+            Logger.log("Attempted to load while data was already loaded");
         }
         if (!file.exists())
             return;
@@ -49,24 +50,22 @@ public class ServerPlayer {
             String data = reader.readLine();
             reader.close();
             if (data == null) {
-                PlayerTracker.getLogger().severe(String.format("%s's data is null", file.getName()));
+                Logger.logf("%s's data is null", file.getName());
                 return;
             }
             JsonElement obj = JsonParser.parseString(data);
             if (!obj.isJsonObject()) {
-                PlayerTracker.getLogger().severe(String.format("Json data from file %s is invalid", file.getName()));
+                Logger.logf("Json data from file %s is invalid", file.getName());
                 return;
             }
 
             JsonObject dat = obj.getAsJsonObject();
             if (!dat.has("name")) {
-                PlayerTracker.getLogger()
-                        .severe(String.format("Json data from file %s does not have name", file.getName()));
+                Logger.logf("Json data from file %s does not have name", file.getName());
                 return;
             }
             if (dat.get("name").isJsonNull()) {
-                PlayerTracker.getLogger()
-                        .warning(String.format("Json data from file %s has null name", file.getName()));
+                Logger.logf("Json data from file %s has null name", file.getName());
                 return;
             }
 
@@ -75,8 +74,7 @@ public class ServerPlayer {
 
             JsonElement timeData = dat.get("time");
             if (!timeData.isJsonObject()) {
-                PlayerTracker.getLogger().warning(
-                        String.format("Player data %s is malformed from file %s", timeData.toString(), file.getName()));
+                Logger.logf("Player data %s is malformed from file %s", timeData.toString(), file.getName());
                 return;
             }
 
@@ -85,9 +83,8 @@ public class ServerPlayer {
             for (Entry<String, JsonElement> entry : timeObj.entrySet()) {
                 String server = entry.getKey();
                 if (!entry.getValue().isJsonObject()) {
-                    PlayerTracker.getLogger()
-                            .severe(String.format("Skipping server data %s because it is malformed (%s)", server,
-                                    entry.getValue().toString()));
+                    Logger.logf("Skipping server data %s because it is malformed (%s)", server,
+                            entry.getValue().toString());
                     continue;
                 }
                 LinkedHashMap<Long, Long> timeMap = new LinkedHashMap<>();
@@ -96,8 +93,7 @@ public class ServerPlayer {
                 for (Entry<String, JsonElement> e : entry.getValue().getAsJsonObject().entrySet()) {
                     long c = Long.parseLong(e.getKey());
                     if (c < last) {
-                        PlayerTracker.getLogger()
-                                .warning(String.format("WARNING Loading data of %s and it is unordered", rawName));
+                        Logger.logf("WARNING Loading data of %s and it is unordered", rawName);
                     }
                     timeMap.put(Long.parseLong(e.getKey()), e.getValue().getAsLong());
                 }
@@ -129,16 +125,15 @@ public class ServerPlayer {
                 long end = e.getValue();
                 if (end == -1) {
                     if (online) {
-                        PlayerTracker.getLogger()
-                                .warning("More than 1 entry had a value of -1 for player " + rawName);
-                        PlayerTracker.getLogger().warning(String.format("%d: %d", e.getKey(), e.getValue()));
+                        Logger.log("More than 1 entry had a value of -1 for player " + rawName);
+                        Logger.logf("%d: %d", e.getKey(), e.getValue());
                     }
                     online = true;
                     end = System.currentTimeMillis();
                 }
 
                 if (e.getKey() < last)
-                    PlayerTracker.getLogger().warning(String.format("Player data of %s is unordered", rawName));
+                    Logger.logf("Player data of %s is unordered", rawName);
 
                 times.addProperty(e.getKey().toString(), end);
             }
@@ -195,9 +190,9 @@ public class ServerPlayer {
      */
     public void logOff(ServerData server) {
         if (this.times.getOrDefault(server.getName(), new LinkedHashMap<>()).isEmpty()) {
-            PlayerTracker.getLogger().warning(String.format(
-                    "Desynchronization of player tracking, attempted to logOff %s when not logged on", rawName + ""));
-            PlayerTracker.getLogger().warning("Error type: empty");
+            Logger.logf(
+                    "Desynchronization of player tracking, attempted to logOff %s when not logged on", rawName + "");
+            Logger.log("Error type: empty");
             return;
         }
         LinkedHashMap<Long, Long> times = this.times.getOrDefault(server.getName(), new LinkedHashMap<>());
@@ -208,9 +203,8 @@ public class ServerPlayer {
         for (Entry<Long, Long> entry : sessions) {
             if (entry.getValue() == -1) {
                 if (online) {
-                    PlayerTracker.getLogger()
-                            .warning("Attempted to log off a player that should have already been logged off");
-                    PlayerTracker.getLogger().warning(String.format("%d: %d", entry.getKey(), entry.getValue()));
+                    Logger.log("Attempted to log off a player that should have already been logged off");
+                    Logger.logf("%d: %d", entry.getKey(), entry.getValue());
                     entry.setValue(System.currentTimeMillis());
                 }
                 online = true;
@@ -220,19 +214,18 @@ public class ServerPlayer {
         Entry<Long, Long> entry = sessions.get(sessions.size() - 1);
 
         if (entry.getValue() != -1) {
-            PlayerTracker.getLogger()
-                    .warning(String.format(
-                            "[WARNING] Desynchronization of player tracking, attempted to logOff %s when not logged on",
-                            rawName));
-            PlayerTracker.getLogger().warning("Error type: -1");
-            PlayerTracker.getLogger().warning("Actual value: " + entry.getValue() + " key: " + entry.getKey()
+            Logger.log(String.format(
+                    "[WARNING] Desynchronization of player tracking, attempted to logOff %s when not logged on",
+                    rawName));
+            Logger.log("Error type: -1");
+            Logger.log("Actual value: " + entry.getValue() + " key: " + entry.getKey()
                     + " (time ago: " + (System.currentTimeMillis() - entry.getKey()) + ")");
-            PlayerTracker.getLogger().warning(String.format("0 index: %d", sessions.get(0).getValue()));
+            Logger.logf("0 index: %d", sessions.get(0).getValue());
             for (Entry<Long, Long> v : sessions) {
-                PlayerTracker.getLogger().warning(String.format("%d: %d", v.getKey(), v.getValue()));
+                Logger.logf("%d: %d", v.getKey(), v.getValue());
             }
             sessions.forEach(
-                    (k) -> PlayerTracker.getLogger().warning(String.format("> %d: %d", k.getKey(), k.getValue())));
+                    (k) -> Logger.logf("> %d: %d", k.getKey(), k.getValue()));
             return;
         }
 

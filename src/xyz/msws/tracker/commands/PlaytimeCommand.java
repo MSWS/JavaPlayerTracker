@@ -43,7 +43,7 @@ public class PlaytimeCommand extends AbstractCommand {
             try {
                 time = Long.parseLong(s) * 1000 * 60;
             } catch (NumberFormatException e) {
-                time = TimeParser.getDate(s);
+                time = System.currentTimeMillis() - TimeParser.getDate(s);
             }
 
             if (time == 0) {
