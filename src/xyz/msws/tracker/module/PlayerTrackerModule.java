@@ -86,6 +86,7 @@ public class PlayerTrackerModule extends Module {
     public ServerPlayer getPlayer(String name) {
         if (players.containsKey(name))
             return players.get(name);
+        Logger.logf("Loading player data of %s", name);
         ServerPlayer result = new ServerPlayer(name);
         players.put(name, result);
         return result;

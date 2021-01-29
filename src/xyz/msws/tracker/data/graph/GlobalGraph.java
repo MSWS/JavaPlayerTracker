@@ -7,6 +7,7 @@ import xyz.msws.tracker.data.ServerPlayer;
 import xyz.msws.tracker.module.PlayerTrackerModule;
 import xyz.msws.tracker.utils.TimeParser;
 
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,16 +23,22 @@ public class GlobalGraph extends Graph {
 
     @Override
     public File generate() {
-        XYChart chart = new XYChart(500, 400, Styler.ChartTheme.XChart);
+        XYChart chart = new XYChart(500, 400, Styler.ChartTheme.Matlab);
+        Styler styler = chart.getStyler();
+        styler.setChartBackgroundColor(new Color(54, 57, 63));
+        styler.setChartFontColor(Color.WHITE);
+        styler.setLegendBackgroundColor(Color.DARK_GRAY);
+        styler.setPlotBackgroundColor(Color.BLACK);
+        styler.setLegendPosition(Styler.LegendPosition.InsideNE);
+        styler.setXAxisTitleColor(Color.GREEN.darker());
+        styler.setYAxisTitleColor(Color.BLUE.brighter());
 
         chart.setTitle("Players on all servers");
 
-
-        long size = 1000 * 60 * 60 * 24;
-        long start = System.currentTimeMillis() - (size * 30);
+        long size = 1000 * 60 * 60;
+        long start = System.currentTimeMillis() - (size * 24 * 30);
         chart.setXAxisTitle(TimeParser.getDurationDescription(size / 1000).split(" ")[1] + "s Ago");
         chart.setYAxisTitle("Players");
-//        chart.setCustomXAxisTickLabelsMap();
 
         Map<Object, Object> mappings = new HashMap<>();
 
@@ -50,8 +57,9 @@ public class GlobalGraph extends Graph {
                 }
                 if (players == 0)
                     continue;
-                x.add(s);
-                mappings.put(s, (System.currentTimeMillis() - s) / size);
+                int units = (int) ((System.currentTimeMillis() - s) / size);
+                x.add((long) -units);
+                mappings.put(-units, units == 0 ? "Present" : units);
                 y.add(players);
             }
             chart.addSeries(server, x, y);

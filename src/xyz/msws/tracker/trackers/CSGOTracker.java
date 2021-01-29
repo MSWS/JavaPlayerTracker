@@ -40,7 +40,7 @@ public class CSGOTracker extends Tracker {
         try {
             connection.updatePlayers();
             connection.updatePing();
-            Set<String> unparsed = connection.getPlayers().keySet();
+            Set<String> unparsed = new HashSet<>(connection.getPlayers().keySet());
             for (String s : unparsed) {
                 if (s.trim().isEmpty())
                     continue;
@@ -51,6 +51,7 @@ public class CSGOTracker extends Tracker {
                     continue;
                 }
 
+                Logger.logf("%s joined", s);
                 sp.logOn(server);
             }
 
@@ -59,6 +60,7 @@ public class CSGOTracker extends Tracker {
                     return;
                 ServerPlayer sp = tracker.getPlayer(s);
                 toSave.add(sp);
+                Logger.logf("%s left", s);
                 sp.logOff(server);
             });
             oldPlayers = new HashSet<>(connection.getPlayers().keySet());
