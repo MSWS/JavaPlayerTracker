@@ -2,6 +2,7 @@ package xyz.msws.tracker.data.graph;
 
 import org.knowm.xchart.BitmapEncoder;
 import org.knowm.xchart.XYChart;
+import org.knowm.xchart.XYSeries;
 import org.knowm.xchart.internal.series.Series;
 import org.knowm.xchart.style.XYStyler;
 import xyz.msws.tracker.data.ServerPlayer;
@@ -29,7 +30,6 @@ public class GlobalGraph extends Graph {
         XYChart chart = new XYChart(1200, 800, new TrackerTheme());
         XYStyler styler = chart.getStyler();
 
-
         chart.setTitle("Players on all servers");
 
         long accuracy = TimeUnit.HOURS.toMillis(1), label = TimeUnit.HOURS.toMillis(12);
@@ -41,6 +41,8 @@ public class GlobalGraph extends Graph {
         styler.setXAxisTickMarksColor(styler.getXAxisTitleColor().darker());
         styler.setYAxisTickMarksColor(styler.getYAxisTitleColor().darker());
         styler.setChartFontColor(Color.LIGHT_GRAY);
+        styler.setPlotContentSize(1.0);
+        styler.setDefaultSeriesRenderStyle(XYSeries.XYSeriesRenderStyle.Line);
 
         Map<Object, Object> mappings = new HashMap<>();
         List<String> sort = tracker.getServerNames().stream().sorted().collect(Collectors.toList());
@@ -69,7 +71,6 @@ public class GlobalGraph extends Graph {
                 y.add(players);
             }
             Series series = chart.addSeries(server, x, y);
-
         }
 
         chart.setCustomXAxisTickLabelsMap(mappings);

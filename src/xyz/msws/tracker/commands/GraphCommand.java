@@ -32,6 +32,8 @@ public class GraphCommand extends AbstractCommand {
             message.getChannel().sendFile(file, "graph.png").queue();
             return;
         }
+        String name = String.join(" ", args);
+
         ServerData server = tracker.findServer(name);
         if (server == null) {
             message.getChannel().sendMessage("Unknown server.").queue();
