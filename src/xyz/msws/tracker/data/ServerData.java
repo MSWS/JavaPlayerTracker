@@ -8,11 +8,9 @@ import xyz.msws.tracker.PlayerTracker;
 import xyz.msws.tracker.utils.Logger;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Encapsulates server data including server name, ip, port, and map history
@@ -167,6 +165,28 @@ public class ServerData {
         Set<Long> values = maps.getOrDefault(mapName, new HashSet<>());
         values.add(System.currentTimeMillis());
         maps.put(mapName, values);
+    }
+
+    /**
+     * Returns the best guess of what the server's map was at the time, may return null if no data
+     *
+     * @param time Epoch timestamp to get map at
+     * @return Name of map, may be null
+     */
+    public String getMap(long time) {
+        LinkedHashMap<Long, String> times = new LinkedHashMap<>();
+        maps.forEach((s, longs) -> {
+            longs.forEach(l -> times.put(l, s));
+        });
+        List<Entry<Long, String>> sorted = times.entrySet().stream().sorted(Entry.comparingByKey()).collect(Collectors.toList());
+        String result = null;
+        for (Entry<Long, String> entry : sorted) {
+            if (entry.getKey() > time)
+                return result;
+            result = entry.getValue();
+        }
+
+        return result;
     }
 
     public Map<String, Set<Long>> getMaps() {

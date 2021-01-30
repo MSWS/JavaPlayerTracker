@@ -2,7 +2,8 @@ package xyz.msws.tracker.data.graph;
 
 import org.knowm.xchart.BitmapEncoder;
 import org.knowm.xchart.XYChart;
-import org.knowm.xchart.style.Styler;
+import org.knowm.xchart.internal.series.Series;
+import org.knowm.xchart.style.XYStyler;
 import xyz.msws.tracker.data.ServerPlayer;
 import xyz.msws.tracker.module.PlayerTrackerModule;
 import xyz.msws.tracker.utils.TimeParser;
@@ -14,6 +15,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class GlobalGraph extends Graph {
 
@@ -23,47 +26,52 @@ public class GlobalGraph extends Graph {
 
     @Override
     public File generate() {
-        XYChart chart = new XYChart(500, 400, Styler.ChartTheme.Matlab);
-        Styler styler = chart.getStyler();
-        styler.setChartBackgroundColor(new Color(54, 57, 63));
-        styler.setChartFontColor(Color.WHITE);
-        styler.setLegendBackgroundColor(Color.DARK_GRAY);
-        styler.setPlotBackgroundColor(Color.BLACK);
-        styler.setLegendPosition(Styler.LegendPosition.InsideNE);
-        styler.setXAxisTitleColor(Color.GREEN.darker());
-        styler.setYAxisTitleColor(Color.BLUE.brighter());
+        XYChart chart = new XYChart(1200, 800, new TrackerTheme());
+        XYStyler styler = chart.getStyler();
+
 
         chart.setTitle("Players on all servers");
 
-        long size = 1000 * 60 * 60;
-        long start = System.currentTimeMillis() - (size * 24 * 30);
-        chart.setXAxisTitle(TimeParser.getDurationDescription(size / 1000).split(" ")[1] + "s Ago");
+        long accuracy = TimeUnit.HOURS.toMillis(1), label = TimeUnit.HOURS.toMillis(12);
+        long start = System.currentTimeMillis() - (accuracy * 24 * 30);
+        chart.setXAxisTitle("Time Passed");
         chart.setYAxisTitle("Players");
+        styler.setXAxisTitleColor(new Color(114, 137, 218));
+        styler.setYAxisTitleColor(new Color(0, 191, 255));
+        styler.setXAxisTickMarksColor(styler.getXAxisTitleColor().darker());
+        styler.setYAxisTickMarksColor(styler.getYAxisTitleColor().darker());
+        styler.setChartFontColor(Color.LIGHT_GRAY);
 
         Map<Object, Object> mappings = new HashMap<>();
+        List<String> sort = tracker.getServerNames().stream().sorted().collect(Collectors.toList());
 
-        for (String server : tracker.getServerNames()) {
-
+        for (String server : sort) {
             List<Long> x = new ArrayList<>();
             List<Integer> y = new ArrayList<>();
 
-            for (long s = start; s < System.currentTimeMillis(); s += size) {
+            for (long s = start; s < System.currentTimeMillis(); s += accuracy) {
                 int players = 0;
                 for (ServerPlayer player : tracker.getPlayers()) {
-                    long time = player.getPlaytimeDuring(s, s + size, server);
+                    long time = player.getPlaytimeDuring(s, s + accuracy, server);
                     if (time == 0)
                         continue;
                     players++;
                 }
                 if (players == 0)
                     continue;
-                int units = (int) ((System.currentTimeMillis() - s) / size);
-                x.add((long) -units);
-                mappings.put(-units, units == 0 ? "Present" : units);
+                int units = (int) ((System.currentTimeMillis() - s) / accuracy);
+                x.add(s);
+                if ((s - start) % label == 0 || units == 0) {
+                    mappings.put(s, units == 0 ? "Present" : TimeParser.getDurationDescription((System.currentTimeMillis() - s) / 1000));
+                } else {
+                    mappings.put(s, " ");
+                }
                 y.add(players);
             }
-            chart.addSeries(server, x, y);
+            Series series = chart.addSeries(server, x, y);
+
         }
+
         chart.setCustomXAxisTickLabelsMap(mappings);
         File result = new File("output.png");
         try {

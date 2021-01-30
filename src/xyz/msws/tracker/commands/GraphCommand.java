@@ -4,6 +4,7 @@ import net.dv8tion.jda.api.entities.Message;
 import xyz.msws.tracker.Client;
 import xyz.msws.tracker.data.ServerData;
 import xyz.msws.tracker.data.graph.GlobalGraph;
+import xyz.msws.tracker.data.graph.ServerGraph;
 import xyz.msws.tracker.module.PlayerTrackerModule;
 
 import java.io.File;
@@ -21,21 +22,23 @@ public class GraphCommand extends AbstractCommand {
 
     @Override
     public void execute(Message message, String[] args) {
-        sendServerStats(message, String.join(" ", args));
-    }
+        if (args.length == 0) {
+            File file = new GlobalGraph(tracker).generate();
+            if (file == null || !file.exists()) {
+                message.getChannel().sendMessage("Unable to create graph").queue();
+                return;
+            }
 
-    private boolean sendServerStats(Message message, String name) {
+            message.getChannel().sendFile(file, "graph.png").queue();
+            return;
+        }
         ServerData server = tracker.findServer(name);
-        if (server == null)
-            return false;
-
-        File file = new GlobalGraph(tracker).generate();
-        if (file == null || !file.exists()) {
-            message.getChannel().sendMessage("Unable to create graph").queue();
-            return true;
+        if (server == null) {
+            message.getChannel().sendMessage("Unknown server.").queue();
+            return;
         }
 
+        File file = new ServerGraph(tracker, server).generate();
         message.getChannel().sendFile(file, "graph.png").queue();
-        return true;
     }
 }
