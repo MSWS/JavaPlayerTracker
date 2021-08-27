@@ -9,9 +9,9 @@ import net.dv8tion.jda.api.events.message.MessageDeleteEvent;
 import net.dv8tion.jda.api.hooks.SubscribeEvent;
 import xyz.msws.tracker.Client;
 import xyz.msws.tracker.PlayerTracker;
-import xyz.msws.tracker.utils.TimeParser;
 
 import java.awt.*;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.TimeoutException;
 
@@ -67,7 +67,7 @@ public class ServerStatus extends TimerTask {
 		embed.addField("Players", players.size() + "/" + map.get("maxPlayers"), true);
 		embed.addField("Map", map.get("mapName") + "", true);
 		embed.addField("Ping", ping + "", true);
-		embed.setFooter(recents + "\nLast Updated: " + TimeParser.getDateDescription(lastUpdated));
+		embed.setTimestamp(Instant.now());
 
 		if (map.containsKey("maxPlayers")) {
 			int max = Integer.parseInt(map.getOrDefault("maxPlayers", "-1") + "");
@@ -97,9 +97,9 @@ public class ServerStatus extends TimerTask {
 						left.add(p);
 				}
 				if (joined.length() > 0)
-					recents += "[+] " + joined.toString() + (left.length() > 0 ? "\n" : "");
+					recents += "[+] " + joined + (left.length() > 0 ? "\n" : "");
 				if (left.length() > 0)
-					recents += "[-] " + left.toString();
+					recents += "[-] " + left;
 			}
 			// Clone player list
 			this.players = new HashSet<>(server.getPlayers().keySet());
