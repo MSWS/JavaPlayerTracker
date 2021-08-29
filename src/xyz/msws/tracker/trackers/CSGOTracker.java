@@ -14,7 +14,6 @@ import java.util.TimerTask;
 public class CSGOTracker extends Tracker {
 
     private final PlayerTrackerModule tracker;
-    private final Set<ServerPlayer> toSave = new HashSet<>();
 
     public CSGOTracker(Client client, ServerData server) {
         super(client, server);
@@ -45,27 +44,23 @@ public class CSGOTracker extends Tracker {
                 if (s.trim().isEmpty())
                     continue;
                 ServerPlayer sp = tracker.getPlayer(s);
-                toSave.add(sp);
                 if (oldPlayers.contains(s)) {
                     oldPlayers.remove(s);
                     continue;
                 }
 
                 Logger.logf("%s joined", s);
-                sp.logOn(server);
             }
 
             oldPlayers.forEach(s -> {
                 if (s.trim().isEmpty())
                     return;
                 ServerPlayer sp = tracker.getPlayer(s);
-                toSave.add(sp);
                 Logger.logf("%s left", s);
-                sp.logOff(server);
             });
             oldPlayers = new HashSet<>(connection.getPlayers().keySet());
 
-            server.addMap(connection.getServerInfo().get("mapName") + "");
+//            server.addMap(connection.getServerInfo().get("mapName") + "");
             tracker.update(server, connection);
         } catch (Exception e) {
             e.printStackTrace();
@@ -75,7 +70,5 @@ public class CSGOTracker extends Tracker {
 
     @Override
     public void save() {
-        toSave.forEach(ServerPlayer::saveData);
-        toSave.clear();
     }
 }

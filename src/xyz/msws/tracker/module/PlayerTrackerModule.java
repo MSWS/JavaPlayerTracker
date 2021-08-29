@@ -10,8 +10,6 @@ import xyz.msws.tracker.data.ServerPlayer;
 import xyz.msws.tracker.data.ServerStatus;
 import xyz.msws.tracker.utils.Logger;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -43,26 +41,6 @@ public class PlayerTrackerModule extends Module {
         }
 
         servers.values().forEach(s -> timer.schedule(s, 0, 1000 * 30));
-
-        Logger.log("Loading all player files...");
-
-        if (PlayerTracker.PLAYER_FILE.listFiles() == null) {
-            try {
-                PlayerTracker.PLAYER_FILE.getParentFile().createNewFile();
-            } catch (IOException e) {
-                e.printStackTrace();
-                Logger.log(e);
-            }
-        } else {
-            for (File f : PlayerTracker.PLAYER_FILE.listFiles()) {
-                ServerPlayer sp = new ServerPlayer(f);
-                if (sp.getRawName() == null)
-                    continue;
-                players.put(sp.getRawName(), sp);
-            }
-        }
-
-        Logger.logf("Loaded %d files", players.size());
     }
 
     private void purge(TextChannel channel) {
@@ -92,15 +70,6 @@ public class PlayerTrackerModule extends Module {
         return result;
     }
 
-    public void deleteAllData() {
-        Logger.log("Deleting all player data...");
-        players = new HashMap<>();
-        if (PlayerTracker.PLAYER_FILE.listFiles() != null)
-            for (File f : PlayerTracker.PLAYER_FILE.listFiles())
-                f.delete();
-        PlayerTracker.PLAYER_FILE.delete();
-    }
-
     public void deletePlayer(String player) {
         players.remove(player);
     }
@@ -122,34 +91,10 @@ public class PlayerTrackerModule extends Module {
 
     public ServerData getServer(String server) {
         for (ServerData dat : servers.keySet()) {
-            if (dat.getName().equals(server)) {
+            if (dat.getName().equals(server))
                 return dat;
-            }
         }
         return null;
-    }
-
-    public ServerData findServer(String name) {
-        String serverName = null;
-        ServerData server;
-        for (String n : getServerNames()) {
-            if (n.equalsIgnoreCase(name)) {
-                serverName = n;
-                break;
-            }
-        }
-        for (String n : getServerNames()) {
-            if (n.replace(" ", "").toLowerCase().contains(name.toLowerCase())
-                    || name.toLowerCase().contains(n.replace(" ", "").toLowerCase())) {
-                serverName = n;
-                break;
-            }
-        }
-        final String fs = serverName;
-        server = getServers().parallelStream().filter(s -> s.getName().equals(fs)).findFirst().orElse(null);
-        if (serverName == null || server == null)
-            return null;
-        return server;
     }
 
     public Collection<ServerPlayer> getPlayers() {

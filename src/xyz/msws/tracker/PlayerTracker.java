@@ -16,7 +16,10 @@ import xyz.msws.tracker.utils.Logger;
 import javax.security.auth.login.LoginException;
 import java.io.File;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Timer;
 import java.util.logging.Level;
 import java.util.logging.LogManager;
 
@@ -27,7 +30,6 @@ import java.util.logging.LogManager;
  */
 public class PlayerTracker extends Client {
 
-    public static final File PLAYER_FILE = new File("players"), SERVER_FILE = new File("servers");
     private final TrackerConfig config;
 
     public PlayerTracker(String token) {
@@ -76,14 +78,11 @@ public class PlayerTracker extends Client {
 
     private void registerCommands() {
         Logger.log("Registering commands...");
-        commands.registerCommand(new PlaytimeCommand(this, "playtime"));
         commands.registerCommand(new LogsCommand(this, "logs"));
         commands.registerCommand(new StatisticsCommand(this, "statistics"));
         commands.registerCommand(new HelpCommand(this, "help"));
-        commands.registerCommand(new DeletePlayerCommand(this, "deleteplayer"));
         commands.registerCommand(new AddServerCommand(this, "addserver"));
         commands.registerCommand(new DeleteServerCommand(this, "deleteserver"));
-        commands.registerCommand(new GraphCommand(this, "graph"));
         Logger.log("Successfully registered " + commands.getCommands().size() + " commands");
     }
 
@@ -91,7 +90,6 @@ public class PlayerTracker extends Client {
         Logger.log("Starting timers...");
         Timer timer = new Timer();
 
-        List<Tracker> trackers = new ArrayList<>();
         List<ServerData> data = new ArrayList<>(config.getServers().keySet());
 
         modules.add(new PlayerTrackerModule(this, data));
@@ -99,17 +97,7 @@ public class PlayerTracker extends Client {
         for (ServerData d : data) {
             Tracker t = new CSGOTracker(this, d);
             timer.schedule(t, 0, 1000 * 20);
-            trackers.add(t);
         }
-
-        // Save player data
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                data.forEach(ServerData::saveData);
-                trackers.forEach(Tracker::save);
-            }
-        }, 10 * 1000, 1000 * 60 * 5);
     }
 
     public TrackerConfig getConfig() {
